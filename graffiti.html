@@ -1,0 +1,45 @@
+<!doctype html>
+<html>
+  <head>
+    <title> VK Experiments :: Graffiti </title>
+    <link rel="stylesheet" type="text/css" href="css/graffiti.css" />
+    <script type="text/javascript" src="js/common.js"></script>
+    <script type="text/javascript" src="js/graffiti.js"></script>
+  </head>
+  <body>
+    <div id="shade">
+      <div id="popup_wrap" class="center">
+        <div id="popup_header">Graffiti to Oleg's Wall</div>
+        <div id="popup_content">
+          <div id="graffiti_wrap" class="center">
+            <div id="graffiti_canvas_wrap">
+              <canvas id="graffiti_canvas_1" width="620" height="310"></canvas>
+            </div>
+            <div id="graffiti_tools">
+              <div id="graffiti_tools_brush" class="fl_l">
+                <canvas id="graffiti_brush_canvas" width="80" height="80"></canvas>
+              </div>
+              <div class="fl_l">
+                <div class="graffiti_slider_caption" style="margin-top: 17px;">Thickness</div>
+                <div class="graffiti_slider_caption" style="margin-top: 12px;">Opacity</div>
+              </div>
+              <div class="fl_l" style="margin-left: 5px;">
+
+                <div id="graffiti_slider_thickness_wrap" class="graffiti_slider_wrap" style="margin-top: 23px;" onmousedown="graffiti.sliderMouseDown('thickness', event);" onmouseover="graffiti.sliderBeforeWheel('thickness');">
+                  <div class="graffiti_slider center"></div>
+                  <div id="graffiti_slider_thickness_thumb" class="graffiti_slider_thumb"></div>
+                </div>
+
+                <div id="graffiti_slider_opacity_wrap" class="graffiti_slider_wrap" style="margin-top: 14px;" onmousedown="graffiti.sliderMouseDown('opacity', event);" onmouseover="graffiti.sliderBeforeWheel('opacity');">
+                  <div class="graffiti_slider center"></div>
+                  <div id="graffiti_slider_opacity_thumb" class="graffiti_slider_thumb"></div>
+                </div>
+
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
