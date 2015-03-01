@@ -48,7 +48,7 @@ body {
   z-index: 0;
 }
 
-#graffiti_canvas_wrap {
+#graffiti_drawarea_wrap {
   background-color: #ffffff;
   width: 620px;
   height: 310px;

@@ -1,17 +1,22 @@
 var graffiti = {
 
   brush: [20, "95, 127, 162", 1], // size, rgb color, opacity
+  strokes: [],
 
   brushPreviewCanvas: undefined,
   brushPreviewContext: undefined,
   colorPickerWrap: undefined,
   colorPicker: undefined,
   colorPickerActiveCell: undefined,
+  drawAreaCanvas: undefined,
+  drawAreaContext: undefined,
+  drawAreaWrap: undefined,
 
   init: function() {
     graffiti.attachEvents();
     graffiti.colorPickerInit();
     graffiti.brushPreviewInit();
+    graffiti.drawAreaInit();
     graffiti.sliderInit("thickness", 
                         ge("graffiti_slider_thickness_wrap"),
                         ge("graffiti_slider_thickness_thumb"), 
@@ -26,9 +31,11 @@ var graffiti = {
     document.addEventListener("mousemove", function() {
       //console.log(event);
       graffiti.sliderMouseMove(event);
+      graffiti.drawAreaEventPool(event);
     }, false);
     document.addEventListener("mouseup", function() {
       graffiti.sliderMouseUp();
+      graffiti.drawAreaFinishStroke();
     }, false);
   },
 
@@ -190,7 +197,7 @@ var graffiti = {
       var delta = (event.detail < 0 || event.wheelDelta > 0) ? -5 : 5;
       pixelPosition = (width / 100 * slider.value) + delta;
     } else {
-      pixelPosition = event.pageX - getXY(slider.wrapper)[0];
+      pixelPosition = event.clientX - getXY(slider.wrapper)[0];
     }
     slider.value = pixelPosition / width * 100;
     if(pixelPosition > width) pixelPosition = width, slider.value = 100;
@@ -212,7 +219,63 @@ var graffiti = {
         graffiti.brushPreviewUpdate();
       break;
     }
+  },
+
+  // draw area
+
+  drawAreaInUse: 0,
+
+  drawAreaWrapOffset: [], // recalculate offset method?
+
+  drawAreaInit: function() {
+    graffiti.drawAreaWrap = ge("graffiti_drawarea_wrap");
+    graffiti.drawAreaCanvas = ge("graffiti_drawarea_canvas");
+    graffiti.drawAreaContext = graffiti.drawAreaCanvas.getContext("2d");
+    graffiti.drawAreaWrapOffset = getXY(graffiti.drawAreaWrap);
+  },
+
+  drawAreaEventPool: function(event) {
+    if(graffiti.drawAreaInUse == 1) {
+      switch(event.type) {
+        case "mousemove":
+          var xy = getXY(graffiti.drawAreaWrap);
+          graffiti.strokes.push([event.clientX - xy[0], event.clientY - xy[1]]);
+          console.log([event.clientX - xy[0], event.clientY - xy[1]]);
+          graffiti.drawAreaDraw();
+        break;
+      }
+    }
+  },
+
+  drawAreaDraw: function() {
+    var ctx = graffiti.drawAreaContext;
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+    ctx.lineWidth = graffiti.brush[0];
+    ctx.strokeStyle = "rgba(" + graffiti.brush[1] + ", " + graffiti.brush[2] + ")";
+    ctx.beginPath();
+    console.log(graffiti.strokes);
+    if(graffiti.strokes.length > 2) {
+      var st1 = graffiti.strokes.shift();
+      ctx.moveTo(st1[0], st1[1]);
+      var st2 = graffiti.strokes.shift();
+      ctx.lineTo(st2[0], st2[1]);
+      ctx.closePath();
+      ctx.stroke();
+    }
+  },
+
+  drawAreaBeginStroke: function(event) {
+    graffiti.drawAreaInUse = 1;
+    graffiti.strokes.push([]);
+  },
+
+  drawAreaFinishStroke: function() {
+    if(graffiti.drawAreaInUse == 1) {
+      graffiti.drawAreaInUse = 0;
+    }
   }
+
 
 };
 
