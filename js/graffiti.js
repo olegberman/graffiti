@@ -1,21 +1,24 @@
 var graffiti = {
 
-  brush: [20, "0, 0, 0", 1], // size, rgb color, opacity
+  brush: [20, "95, 127, 162", 1], // size, rgb color, opacity
 
   brushPreviewCanvas: undefined,
   brushPreviewContext: undefined,
+  colorPickerCanvas: undefined,
+  colorPickerContext: undefined,
 
   init: function() {
     graffiti.attachEvents();
+    graffiti.colorPickerInit();
     graffiti.brushPreviewInit();
     graffiti.sliderInit("thickness", 
                         ge("graffiti_slider_thickness_wrap"),
                         ge("graffiti_slider_thickness_thumb"), 
-                        30);
+                        40);
     graffiti.sliderInit("opacity",
                         ge("graffiti_slider_opacity_wrap"),
                         ge("graffiti_slider_opacity_thumb"), 
-                        70);
+                        80);
   },
 
   attachEvents: function() {
@@ -42,7 +45,7 @@ var graffiti = {
   // brush preview
 
   brushPreviewInit: function() {
-    graffiti.brushPreviewCanvas = document.getElementById("graffiti_brush_canvas");
+    graffiti.brushPreviewCanvas = ge("graffiti_brush_canvas");
     graffiti.brushPreviewContext = graffiti.brushPreviewCanvas.getContext("2d");
     graffiti.normalizeCanvasRatios(graffiti.brushPreviewCanvas, graffiti.brushPreviewContext);
     graffiti.brushPreviewUpdate();
@@ -60,6 +63,15 @@ var graffiti = {
     ctx.moveTo(40, 40);
     ctx.lineTo(40, 40.5);
     ctx.stroke();
+  },
+
+  // colorpicker
+
+  colorPickerInit: function() {
+    /*graffiti.colorPickerCanvas = ge("graffiti_colorpicker_canvas");
+    graffiti.colorPickerContext = graffiti.colorPickerCanvas.getContext("2d");
+    var ctx = graffiti.colorPickerContext;*/
+
   },
 
   // sliders
@@ -123,7 +135,7 @@ var graffiti = {
   sliderUpdated: function(id) {
     switch(id) {
       case "thickness":
-        var thickness = graffiti.sliders[id].value / 100 * 60;
+        var thickness = graffiti.sliders[id].value / 100 * 70;
         graffiti.brush[0] = (thickness < 0) ? 1 : thickness;
         graffiti.brushPreviewUpdate();
       break;

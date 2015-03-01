@@ -19,22 +19,32 @@
               <div id="graffiti_tools_brush" class="fl_l">
                 <canvas id="graffiti_brush_canvas" width="80" height="80"></canvas>
               </div>
-              <div class="fl_l">
-                <div class="graffiti_slider_caption" style="margin-top: 17px;">Thickness</div>
-                <div class="graffiti_slider_caption" style="margin-top: 12px;">Opacity</div>
+              <div class="fl_l graffiti_tools_section">
+                <div class="graffiti_slider_caption">Color</div>
               </div>
-              <div class="fl_l" style="margin-left: 5px;">
-
-                <div id="graffiti_slider_thickness_wrap" class="graffiti_slider_wrap" style="margin-top: 23px;" onmousedown="graffiti.sliderMouseDown('thickness', event);" onmouseover="graffiti.sliderBeforeWheel('thickness');">
+              <div class="fl_l graffiti_tools_section" style="margin-left: 15px;">
+                <div id="graffiti_colorpreview_wrap">
+                  <div id="graffiti_colorpreview_arrow"></div>
+                  <div id="graffiti_colorpreview_box"></div>
+                </div>
+              </div>
+              <div class="fl_l graffiti_tools_section">
+                <div class="graffiti_slider_caption">Thickness</div>
+              </div>
+              <div class="fl_l">
+                <div id="graffiti_slider_thickness_wrap" class="graffiti_slider_wrap" onmousedown="graffiti.sliderMouseDown('thickness', event);" onmouseover="graffiti.sliderBeforeWheel('thickness');">
                   <div class="graffiti_slider center"></div>
                   <div id="graffiti_slider_thickness_thumb" class="graffiti_slider_thumb"></div>
                 </div>
-
-                <div id="graffiti_slider_opacity_wrap" class="graffiti_slider_wrap" style="margin-top: 14px;" onmousedown="graffiti.sliderMouseDown('opacity', event);" onmouseover="graffiti.sliderBeforeWheel('opacity');">
+              </div>
+              <div class="fl_l graffiti_tools_section">
+                <div class="graffiti_slider_caption">Opacity</div>
+              </div>
+              <div class="fl_l">
+                <div id="graffiti_slider_opacity_wrap" class="graffiti_slider_wrap" onmousedown="graffiti.sliderMouseDown('opacity', event);" onmouseover="graffiti.sliderBeforeWheel('opacity');">
                   <div class="graffiti_slider center"></div>
                   <div id="graffiti_slider_opacity_thumb" class="graffiti_slider_thumb"></div>
                 </div>
-
               </div>
             </div>
           </div>
