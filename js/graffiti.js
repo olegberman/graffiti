@@ -4,6 +4,7 @@ var graffiti = {
 
   brushPreviewCanvas: undefined,
   brushPreviewContext: undefined,
+  colorPickerWrap: undefined,
   colorPicker: undefined,
   colorPickerActiveCell: undefined,
 
@@ -67,9 +68,15 @@ var graffiti = {
 
   // colorpicker
 
+  colorPickerLastHighlight: undefined,
+
   colorPickerInit: function() {
+    graffiti.colorPickerWrap = ge("graffiti_colorpicker_wrap");
     graffiti.colorPicker = ge("graffiti_colorpicker");
     graffiti.colorPickerActiveCell = ge("graffiti_colorpicker_cell_active");
+    var position = getXY(ge("graffiti_colorpreview_wrap"));
+    graffiti.colorPickerWrap.style.left = position[0] - 50 + "px";
+    graffiti.colorPickerWrap.style.top = position[1] + 30 + "px";
     var html = "";
     var colors = [];
     for(var r = 0; r < 6; r++) {
@@ -96,11 +103,42 @@ var graffiti = {
     graffiti.colorPicker.innerHTML = html;
   },
 
+  colorPickerOpened: 0,
+
+  colorPickerToggle: function() {
+    if(graffiti.colorPickerOpened == 0) {
+      var position = getXY(ge("graffiti_colorpreview_wrap"));
+      graffiti.colorPickerWrap.style.display = "block";
+      animate(graffiti.colorPickerWrap, { opacity: 1, top: position[1] - 230 }, 100);
+      graffiti.colorPickerOpened = 1;
+    } else {
+      graffiti.colorPickerHide();
+    }
+  },
+
+  colorPickerHide: function() {
+    var position = getXY(ge("graffiti_colorpreview_wrap"));
+    animate(graffiti.colorPickerWrap, { opacity: 0, top: position[1] + 30 }, 100, function() {
+      graffiti.colorPickerWrap.style.display = "none";
+    });
+    graffiti.colorPickerOpened = 0;
+  },
+
   colorPickerHighlight: function(target) {
-    var position = getXY(target);
-    graffiti.colorPickerActiveCell.style.left = position[0] + "px";
-    graffiti.colorPickerActiveCell.style.top = position[1] + "px";
-    console.log(position);
+    if(graffiti.colorPickerOpened == 1) {
+      graffiti.colorPickerLastHighlight = target.style.backgroundColor.replace(/(rgb\(|\))/g, "");
+      var position = getXY(target);
+      graffiti.colorPickerActiveCell.style.display = "block";
+      graffiti.colorPickerActiveCell.style.left = position[0] + "px";
+      graffiti.colorPickerActiveCell.style.top = position[1] + "px";
+    } else {
+      graffiti.colorPickerActiveCell.style.display = "none";
+    }
+  },
+
+  colorPickerChooseColor: function() {
+    graffiti.brush[1] = graffiti.colorPickerLastHighlight;
+    graffiti.brushPreviewUpdate();
   },
 
   // sliders

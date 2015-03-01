@@ -43,7 +43,9 @@ body {
 }
 
 #graffiti_utils {
-
+  margin-top: -10000px;
+  margin-left: -10000px;
+  z-index: 0;
 }
 
 #graffiti_canvas_wrap {
@@ -95,6 +97,7 @@ body {
 }
 
 #graffiti_colorpicker_wrap {
+  opacity: 0;
   position: absolute;
   z-index: 1;
   background-color: #fff;
