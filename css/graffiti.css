@@ -23,7 +23,7 @@ body {
 #popup_wrap {
   width: 640px;
   box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.35);
-  margin-top: 80px;
+  margin-top: 70px;
 }
 
 #popup_header {
@@ -42,6 +42,29 @@ body {
   width: 620px;
 }
 
+#graffiti_buttons {
+  overflow: hidden;
+  height: 27px;
+  cursor: pointer;
+  border-bottom: 1px solid #eef3fa;
+}
+
+.graffiti_button {
+  overflow: hidden;
+  font-weight: bold;
+  color: #2B587A;
+  text-align: center;
+  padding: 6px 0;
+  width: 33%;
+  border-right: 1px solid #eef3fa;
+  transition: color 0.3s;
+}
+
+.graffiti_button:hover {
+  color: #38729F;
+  transition: color 0.3s;
+}
+
 #graffiti_utils {
   margin-top: -10000px;
   margin-left: -10000px;
@@ -54,6 +77,16 @@ body {
   height: 310px;
 }
 
+#graffiti_canvas_main, #graffiti_canvas_stroke {
+  width: 620px;
+  height: 310px;
+}
+
+#graffiti_canvas_stroke {
+  position: relative;
+  top: -313px;
+}
+
 #graffiti_tools {
   overflow: hidden;
   height: 81px;
@@ -64,7 +97,7 @@ body {
   margin-left: 15px;
 }
 
-#graffiti_tools_brush {
+#graffiti_tools_brush, #graffiti_brush_canvas {
   width: 80px;
   height: 80px;
 }

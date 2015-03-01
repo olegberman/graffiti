@@ -12,12 +12,18 @@
         <div id="popup_header">Graffiti to Oleg's Wall</div>
         <div id="popup_content">
           <div id="graffiti_wrap" class="center">
-            <div id="graffiti_drawarea_wrap" onmousedown="graffiti.drawAreaBeginStroke(event);">
-              <canvas id="graffiti_drawarea_canvas" width="620" height="310"></canvas>
+            <div id="graffiti_buttons">
+              <div class="graffiti_button fl_l" onclick="graffiti.historyStepBack();">Back</div>
+              <div class="graffiti_button fl_l" onclick="graffiti.drawAreaErase();">Erase</div>
+              <div class="graffiti_button fl_l" style="border: 0;">Save</div>
+            </div>
+            <div id="graffiti_drawarea_wrap" onmousedown="graffiti.drawAreaBeginStroke(event);" style="width: 620px; height: 310px;">
+              <canvas id="graffiti_canvas_main" width="1240" height="620"></canvas>
+              <canvas id="graffiti_canvas_stroke" width="1240" height="620"></canvas>
             </div>
             <div id="graffiti_tools">
               <div id="graffiti_tools_brush" class="fl_l">
-                <canvas id="graffiti_brush_canvas" width="80" height="80"></canvas>
+                <canvas id="graffiti_brush_canvas" width="160" height="160"></canvas>
               </div>
               <div class="fl_l graffiti_tools_section">
                 <div class="graffiti_slider_caption">Color</div>
