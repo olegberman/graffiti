@@ -4,8 +4,8 @@ var graffiti = {
 
   brushPreviewCanvas: undefined,
   brushPreviewContext: undefined,
-  colorPickerCanvas: undefined,
-  colorPickerContext: undefined,
+  colorPicker: undefined,
+  colorPickerActiveCell: undefined,
 
   init: function() {
     graffiti.attachEvents();
@@ -68,10 +68,39 @@ var graffiti = {
   // colorpicker
 
   colorPickerInit: function() {
-    /*graffiti.colorPickerCanvas = ge("graffiti_colorpicker_canvas");
-    graffiti.colorPickerContext = graffiti.colorPickerCanvas.getContext("2d");
-    var ctx = graffiti.colorPickerContext;*/
+    graffiti.colorPicker = ge("graffiti_colorpicker");
+    graffiti.colorPickerActiveCell = ge("graffiti_colorpicker_cell_active");
+    var html = "";
+    var colors = [];
+    for(var r = 0; r < 6; r++) {
+      for(var g = 0; g < 6; g++) {
+        for(var b = 0; b < 6; b++) {
+          colors[r * 36 + g * 6 + b] = "rgb(" + (r / 5 * 255) + "," + (g / 5 * 255) + "," + (b / 5 * 255) + ")";
+        }
+      }
+    }
+    for(var j = 0; j < 12; j++) {
+      html += "<div class='graffiti_colorpicker_row'>";
+      for(var i = 0; i < 18; i++) {
+        var r = Math.floor(i / 6) + 3 * Math.floor(j / 6);
+        var g = i % 6;
+        var b = j % 6;
+        var n = r * 36 + g * 6 + b;
+        html += "<div class='graffiti_colorpicker_cell fl_l' \
+                      style='background-color: " + colors[n] + "' \
+                      onmouseover='graffiti.colorPickerHighlight(this)' \
+                      ></div>";
+      }
+      html += "</div>";
+    }
+    graffiti.colorPicker.innerHTML = html;
+  },
 
+  colorPickerHighlight: function(target) {
+    var position = getXY(target);
+    graffiti.colorPickerActiveCell.style.left = position[0] + "px";
+    graffiti.colorPickerActiveCell.style.top = position[1] + "px";
+    console.log(position);
   },
 
   // sliders

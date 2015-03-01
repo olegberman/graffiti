@@ -42,6 +42,10 @@ body {
   width: 620px;
 }
 
+#graffiti_utils {
+
+}
+
 #graffiti_canvas_wrap {
   background-color: #ffffff;
   width: 620px;
@@ -88,6 +92,44 @@ body {
   height: 14px;
   background-color: rgb(95, 127, 162);
   margin-top: 1px;
+}
+
+#graffiti_colorpicker_wrap {
+  position: absolute;
+  z-index: 1;
+  background-color: #fff;
+  top: 250px; left: 350px;
+  width: 289px;
+  height: 200px;
+  border: 1px solid #ccc;
+  box-shadow: 0 0 2px #ddd;
+  padding: 5px;
+}
+
+#graffiti_colorpicker {
+  cursor: pointer;
+  border-left: 1px solid #333;
+  border-top: 1px solid #333;
+}
+
+.graffiti_colorpicker_row {
+  overflow: hidden;
+  border-bottom: 1px solid #333;
+}
+
+.graffiti_colorpicker_cell {
+  width: 15px; 
+  height: 15px;
+  border-right: 1px solid #333;
+}
+
+#graffiti_colorpicker_cell_active {
+  cursor: pointer;
+  position: absolute;
+  z-index: 2;
+  width: 15px;
+  height: 15px;
+  border: 1px solid #fff;
 }
 
 .graffiti_slider_caption {
