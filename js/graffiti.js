@@ -4,7 +4,7 @@ var graffiti = {
   strokes: [],
   drawAreaMaxWidth: 1240,
   drawAreaMaxHeight: 620,
-  historyLimit: 2,
+  historyLimit: 50,
 
   brushPreviewCanvas: undefined,
   brushPreviewContext: undefined,
@@ -294,6 +294,7 @@ var graffiti = {
     var strokes = undefined;
     var recursive = false;
     if(history) {
+      history = history.slice();
       if(history.length != 0) {
         var step = history.pop();
         strokes = step[0];
@@ -320,9 +321,9 @@ var graffiti = {
                  (strokes[0][1] + strokes[1][1]) * 0.5);
       var i = 0;
       while(++i < (strokes.length - 1)) {
-        var abs1 = Math.abs(strokes[i - 1][0] - strokes[i][0]) 
+        var abs1 = Math.abs(strokes[i - 1][0] - strokes[i][0])
                  + Math.abs(strokes[i - 1][1] - strokes[i][1])
-                 + Math.abs(strokes[i][0] - strokes[i + 1][0]) 
+                 + Math.abs(strokes[i][0] - strokes[i + 1][0])
                  + Math.abs(strokes[i][1] - strokes[i + 1][1]);
         var abs2 = Math.abs(strokes[i - 1][0] - strokes[i + 1][0])
                  + Math.abs(strokes[i - 1][1] -  strokes[i + 1][1]);
@@ -348,46 +349,68 @@ var graffiti = {
 
   history: [],
   historyCheckpoint: undefined,
+  historyStepBackLock: 0,
 
   historyAddStep: function(strokes, brush) {
     graffiti.history.push([strokes, brush]);
+    console.log(graffiti.history.length);
     if(graffiti.history.length == graffiti.historyLimit * 2) {
-      var toDraw = [];
+      var data = graffiti.canvasCloneGetData();
+      var checkPointStrokes = graffiti.history.splice(0, graffiti.historyLimit);
       if(graffiti.historyCheckpoint) {
         var image = new Image();
         image.onload = function() {
-          var data = graffiti.canvasCloneGetData();
-          graffiti.drawAreaMainContext.clearRect(0, 0, data[2], data[3]);
-          graffiti.drawAreaMainContext.drawImage(image, 0, 0, data[0], data[1]);
-          toDraw = graffiti.history.splice(0, graffiti.historyLimit);
+          graffiti.drawAreaStrokeContext.drawImage(image, 0, 0, data[0], data[1]);
+          graffiti.draw(graffiti.drawAreaStrokeContext, checkPointStrokes);
+          graffiti.historyCheckpoint = graffiti.drawAreaStrokeCanvas.toDataURL("image/png", 1);
+          graffiti.drawAreaStrokeContext.clearRect(0, 0, data[2], data[3]);
         }
         image.src = graffiti.historyCheckpoint;
       } else {
-        toDraw = graffiti.history.splice(0, graffiti.historyLimit);
+        graffiti.draw(graffiti.drawAreaStrokeContext, checkPointStrokes);
+        graffiti.historyCheckpoint = graffiti.drawAreaStrokeCanvas.toDataURL("image/png", 1);
+        graffiti.drawAreaStrokeContext.clearRect(0, 0, data[2], data[3]);
       }
-      graffiti.draw(graffiti.drawAreaMainContext, toDraw);
-      graffiti.historyCheckpoint = graffiti.drawAreaMainCanvas.toDataURL("image/png", 1);
     }
   },
 
   historyStepBack: function() {
-    console.log(graffiti.history.length);
+    if(graffiti.historyStepBackLock == 1) { return false; }
     var data = graffiti.canvasCloneGetData();
-    if(history.length == 0) {
-      if(!graffiti.historyCheckpoint) {
-        graffiti.drawAreaErase();
-      }
+    if(graffiti.history.length == 0) {
+      graffiti.drawAreaErase();
+      graffiti.historyCheckpoint = null;
     } else {
+      graffiti.historyStepBackLock = 1;
       graffiti.history.pop();
+      console.log(graffiti.history.length);
       graffiti.drawAreaStrokeContext.drawImage(graffiti.drawAreaMainCanvas, 0, 0, data[0], data[1]);
       graffiti.drawAreaStrokeCanvas.style.backgroundColor = "#ffffff";
       graffiti.drawAreaMainContext.clearRect(0, 0, data[2], data[3]);
+      if(graffiti.historyCheckpoint) {
+        drawCheckPoint(function() {
+          resolveAsynch();
+        });
+      } else {
+        resolveAsynch();
+      }
+    }
+    function resolveAsynch() {
       graffiti.draw(graffiti.drawAreaMainContext, graffiti.history);
       animate(graffiti.drawAreaStrokeCanvas, { opacity : 0 }, 200, function() {
         graffiti.drawAreaStrokeContext.clearRect(0, 0, data[2], data[3]);
         graffiti.drawAreaStrokeCanvas.style.backgroundColor = "transparent";
         graffiti.drawAreaStrokeCanvas.style.opacity = "1";
+        graffiti.historyStepBackLock = 0;
       });
+    }
+    function drawCheckPoint(callback) {
+      var image = new Image();
+      image.onload = function() {
+        graffiti.drawAreaMainContext.drawImage(image, 0, 0, data[0], data[1]);
+        callback();
+      }
+      image.src = graffiti.historyCheckpoint;
     }
   },
 
