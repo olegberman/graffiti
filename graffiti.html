@@ -12,16 +12,25 @@
         <div id="popup_header">Graffiti to Oleg's Wall</div>
         <div id="popup_content">
           <div id="graffiti_wrap" class="center">
-            <div id="graffiti_buttons">
-              <div class="graffiti_button fl_l" onclick="graffiti.historyStepBack();">Back</div>
-              <div class="graffiti_button fl_l" onclick="graffiti.drawAreaErase();">Erase</div>
-              <div class="graffiti_button fl_l" style="border: 0;">Save</div>
+            <div id="graffiti_links">
+              <div class="fl_l">
+                <a href="" class="graffiti_link" onclick="graffiti.historyStepBack(); return false;">Back</a> |
+                <a href="" class="graffiti_link" onclick="graffiti.drawAreaErase(); return false;">Erase</a>
+              </div>
+              <div class="fl_r">
+                <a href="" class="graffiti_link" style="border: 0;">Save</a>
+              </div>
             </div>
-            <div id="graffiti_drawarea_wrap" onmousedown="graffiti.drawAreaBeginStroke(event);" style="width: 620px; height: 310px;">
-              <canvas id="graffiti_canvas_main" width="1240" height="620"></canvas>
-              <canvas id="graffiti_canvas_stroke" width="1240" height="620"></canvas>
+            <div id="graffiti_drawarea_border">
+              <div id="graffiti_drawarea_wrap" onmousedown="graffiti.drawAreaBeginStroke(event);" style="width: 620px; height: 310px;">
+                <canvas id="graffiti_canvas_main" width="620" height="310"></canvas>
+                <canvas id="graffiti_canvas_stroke" width="620" height="310"></canvas>
+              </div>
             </div>
-            <div id="graffiti_tools">
+            <div id="graffiti_resize_wrap" onmousedown="graffiti.resizeBegin();">
+              <div id="graffiti_resize_line"></div>
+            </div>
+            <div id="graffiti_tools" class="center">
               <div id="graffiti_tools_brush" class="fl_l">
                 <canvas id="graffiti_brush_canvas" width="160" height="160"></canvas>
               </div>

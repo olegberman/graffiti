@@ -2,6 +2,10 @@ var graffiti = {
 
   brush: [20, "95, 127, 162", 1], // size, rgb color, opacity
   strokes: [],
+  drawAreaCurWidth: 620,
+  drawAreaCurHeight: 310,
+  drawAreaMinWidth: 620,
+  drawAreaMinHeight: 310,
   drawAreaMaxWidth: 1240,
   drawAreaMaxHeight: 620,
   historyLimit: 50,
@@ -17,6 +21,7 @@ var graffiti = {
   drawAreaStrokeCanvas: undefined,
   drawAreaStrokeContext: undefined,
   drawAreaWrap: undefined,
+  resizer: undefined,
 
   init: function() {
     graffiti.attachEvents();
@@ -38,11 +43,16 @@ var graffiti = {
       event.preventDefault();
       graffiti.sliderMouseMove(event);
       graffiti.drawAreaAdvanceStroke(event);
+      graffiti.resize(event);
     }, false);
     document.addEventListener("mouseup", function() {
       graffiti.sliderMouseUp();
       graffiti.drawAreaFinishStroke();
+      graffiti.resizeFinish();
     }, false);
+    window.addEventListener("resize", function() {
+      graffiti.drawAreaUpdateOffset();
+    }, true);
   },
 
   // brush preview
@@ -235,7 +245,7 @@ var graffiti = {
 
   drawAreaInUse: 0,
 
-  drawAreaWrapOffset: [], // recalculate offset method?
+  drawAreaWrapOffset: [], 
 
   drawAreaInit: function() {
     graffiti.drawAreaWrap = ge("graffiti_drawarea_wrap");
@@ -243,9 +253,8 @@ var graffiti = {
     graffiti.drawAreaMainContext = graffiti.drawAreaMainCanvas.getContext("2d");
     graffiti.drawAreaStrokeCanvas = ge("graffiti_canvas_stroke");
     graffiti.drawAreaStrokeContext = graffiti.drawAreaStrokeCanvas.getContext("2d");
-    graffiti.drawAreaMainContext.scale(2, 2);
-    graffiti.drawAreaStrokeContext.scale(2, 2);
-    graffiti.drawAreaWrapOffset = getXY(graffiti.drawAreaWrap);
+    graffiti.drawAreaNormalizeRatios();
+    graffiti.drawAreaUpdateOffset();
   },
 
   drawAreaBeginStroke: function(event) {
@@ -272,7 +281,7 @@ var graffiti = {
       graffiti.drawAreaInUse = 0;
       graffiti.draw(graffiti.drawAreaMainContext);
       graffiti.drawAreaStrokeContext.clearRect(0, 0, data[2], data[3]);
-      graffiti.historyAddStep(graffiti.strokes, graffiti.brush);
+      graffiti.historyAddStep(graffiti.strokes, graffiti.brush.slice());
       graffiti.strokes = [];
     }
   },
@@ -285,7 +294,24 @@ var graffiti = {
       graffiti.drawAreaStrokeContext.clearRect(0, 0, data[2], data[3]);
       graffiti.drawAreaStrokeCanvas.style.opacity = "1";
     });
-    // history flush here
+    graffiti.history = [];
+    graffiti.historyCheckpoint = null;
+  },
+
+  drawAreaNormalizeRatios: function() {
+    var r = window.devicePixelRatio;
+    var w = parseInt(graffiti.drawAreaWrap.style.width);
+    var h = parseInt(graffiti.drawAreaWrap.style.height);
+    graffiti.drawAreaMainCanvas.width = w * r;
+    graffiti.drawAreaMainCanvas.height = h * r;
+    graffiti.drawAreaStrokeCanvas.width = w * r;
+    graffiti.drawAreaStrokeCanvas.height = h * r;
+    graffiti.drawAreaMainContext.scale(r, r);
+    graffiti.drawAreaStrokeContext.scale(r, r);
+  },
+
+  drawAreaUpdateOffset: function() {
+    graffiti.drawAreaWrapOffset = getXY(graffiti.drawAreaWrap);
   },
 
   // draw
@@ -353,7 +379,6 @@ var graffiti = {
 
   historyAddStep: function(strokes, brush) {
     graffiti.history.push([strokes, brush]);
-    console.log(graffiti.history.length);
     if(graffiti.history.length == graffiti.historyLimit * 2) {
       var data = graffiti.canvasCloneGetData();
       var checkPointStrokes = graffiti.history.splice(0, graffiti.historyLimit);
@@ -375,7 +400,9 @@ var graffiti = {
   },
 
   historyStepBack: function() {
-    if(graffiti.historyStepBackLock == 1) { return false; }
+    if(graffiti.historyStepBackLock == 1) { 
+      return false;
+    }
     var data = graffiti.canvasCloneGetData();
     if(graffiti.history.length == 0) {
       graffiti.drawAreaErase();
@@ -383,14 +410,16 @@ var graffiti = {
     } else {
       graffiti.historyStepBackLock = 1;
       graffiti.history.pop();
-      console.log(graffiti.history.length);
       graffiti.drawAreaStrokeContext.drawImage(graffiti.drawAreaMainCanvas, 0, 0, data[0], data[1]);
       graffiti.drawAreaStrokeCanvas.style.backgroundColor = "#ffffff";
       graffiti.drawAreaMainContext.clearRect(0, 0, data[2], data[3]);
       if(graffiti.historyCheckpoint) {
-        drawCheckPoint(function() {
+        var image = new Image();
+        image.onload = function() {
+          graffiti.drawAreaMainContext.drawImage(image, 0, 0, data[0], data[1]);
           resolveAsynch();
-        });
+        }
+        image.src = graffiti.historyCheckpoint;
       } else {
         resolveAsynch();
       }
@@ -404,14 +433,6 @@ var graffiti = {
         graffiti.historyStepBackLock = 0;
       });
     }
-    function drawCheckPoint(callback) {
-      var image = new Image();
-      image.onload = function() {
-        graffiti.drawAreaMainContext.drawImage(image, 0, 0, data[0], data[1]);
-        callback();
-      }
-      image.src = graffiti.historyCheckpoint;
-    }
   },
 
   canvasCloneGetData: function() {
@@ -421,6 +442,45 @@ var graffiti = {
             graffiti.drawAreaMaxWidth,
             graffiti.drawAreaMaxHeight
            ];
+  },
+
+  // resize
+
+  resizing: 0,
+
+  resize: function(event) {
+    if(graffiti.resizing == 1) {
+      var canvasHeight = parseInt(graffiti.drawAreaWrap.style.height);
+      var resizerY = getXY(ge(graffiti.resizer))[1];
+      var newHeight = canvasHeight + event.pageY - resizerY;
+      var newWidth = graffiti.drawAreaMinWidth / graffiti.drawAreaMinHeight * newHeight;
+      if(newHeight < graffiti.drawAreaMinHeight) newHeight = graffiti.drawAreaMinHeight;
+      if(newWidth < graffiti.drawAreaMinWidth) newWidth = graffiti.drawAreaMinWidth;
+      graffiti.drawAreaWrap.style.height = newHeight + "px";
+      graffiti.drawAreaWrap.style.width = newWidth + "px";
+      // remove in production
+      ge("popup_wrap").style.width = (newWidth + 20) + "px";
+      // /remove in production
+      graffiti.drawAreaMainCanvas.style.width = newWidth + "px";
+      graffiti.drawAreaMainCanvas.style.height = newHeight + "px";
+      graffiti.drawAreaStrokeCanvas.style.width = newWidth + "px";
+      graffiti.drawAreaStrokeCanvas.style.height = newHeight + "px";
+      graffiti.drawAreaCurWidth = newWidth;
+      graffiti.drawAreaCurHeight = newHeight;
+    }
+  },
+
+  resizeBegin: function() {
+    if(!graffiti.resizer) {
+      graffiti.resizer = ge("graffiti_resize_wrap");
+    }
+    graffiti.resizing = 1;
+  },
+
+  resizeFinish: function() {
+    graffiti.resizing = 0;
+    graffiti.drawAreaStrokeCanvas.style.top = "-" + graffiti.drawAreaCurHeight + "px";
+    graffiti.drawAreaUpdateOffset();
   }
 
 };
