@@ -8,7 +8,8 @@ var graffiti = {
   drawAreaMinHeight: 310,
   drawAreaMaxWidth: 1240,
   drawAreaMaxHeight: 620,
-  historyLimit: 50,
+  historyLimit: 2,
+  scaleFactor: 1,
 
   brushPreviewCanvas: undefined,
   brushPreviewContext: undefined,
@@ -20,6 +21,8 @@ var graffiti = {
   drawAreaMainContext: undefined,
   drawAreaStrokeCanvas: undefined,
   drawAreaStrokeContext: undefined,
+  drawAreaHistoryCanvas: undefined,
+  drawAreaHistoryContext: undefined,
   drawAreaWrap: undefined,
   resizer: undefined,
 
@@ -46,9 +49,13 @@ var graffiti = {
       graffiti.resize(event);
     }, false);
     document.addEventListener("mouseup", function() {
+      event.preventDefault();
       graffiti.sliderMouseUp();
       graffiti.drawAreaFinishStroke();
       graffiti.resizeFinish();
+    }, false);
+    document.addEventListener("selectstart", function() {
+      event.preventDefault();
     }, false);
     window.addEventListener("resize", function() {
       graffiti.drawAreaUpdateOffset();
@@ -108,7 +115,7 @@ var graffiti = {
         var n = r * 36 + g * 6 + b;
         html += "<div class='graffiti_colorpicker_cell fl_l' \
                       style='background-color: " + colors[n] + "' \
-                      onmouseover='graffiti.colorPickerHighlight(this)' \
+                      onmouseover='graffiti.colorPickerHighlight(event, this)' \
                       ></div>";
       }
       html += "</div>";
@@ -143,7 +150,7 @@ var graffiti = {
     graffiti.colorPickerOpened = 0;
   },
 
-  colorPickerHighlight: function(target) {
+  colorPickerHighlight: function(event, target) {
     if(graffiti.colorPickerOpened == 1) {
       var cleanRGB = target.style.backgroundColor.replace(/(rgb\(|\))/g, "")
       graffiti.colorPickerLastHighlight = cleanRGB;
@@ -253,7 +260,20 @@ var graffiti = {
     graffiti.drawAreaMainContext = graffiti.drawAreaMainCanvas.getContext("2d");
     graffiti.drawAreaStrokeCanvas = ge("graffiti_canvas_stroke");
     graffiti.drawAreaStrokeContext = graffiti.drawAreaStrokeCanvas.getContext("2d");
-    graffiti.drawAreaNormalizeRatios();
+    graffiti.drawAreaHistoryCanvas = ge("graffiti_canvas_history");
+    graffiti.drawAreaHistoryContext = graffiti.drawAreaHistoryCanvas.getContext("2d");
+    var r = window.devicePixelRatio;
+    var w = parseInt(graffiti.drawAreaWrap.style.width);
+    var h = parseInt(graffiti.drawAreaWrap.style.height);
+    graffiti.drawAreaMainCanvas.width = w * r;
+    graffiti.drawAreaMainCanvas.height = h * r;
+    graffiti.drawAreaStrokeCanvas.width = w * r;
+    graffiti.drawAreaStrokeCanvas.height = h * r;
+    graffiti.drawAreaHistoryCanvas.width = graffiti.drawAreaMaxWidth * r;
+    graffiti.drawAreaHistoryCanvas.height = graffiti.drawAreaMaxHeight * r;
+    graffiti.drawAreaMainContext.scale(r, r);
+    graffiti.drawAreaStrokeContext.scale(r, r);
+    graffiti.scaleFactor = graffiti.drawAreaMaxWidth * r / graffiti.drawAreaCurWidth;
     graffiti.drawAreaUpdateOffset();
   },
 
@@ -298,25 +318,13 @@ var graffiti = {
     graffiti.historyCheckpoint = null;
   },
 
-  drawAreaNormalizeRatios: function() {
-    var r = window.devicePixelRatio;
-    var w = parseInt(graffiti.drawAreaWrap.style.width);
-    var h = parseInt(graffiti.drawAreaWrap.style.height);
-    graffiti.drawAreaMainCanvas.width = w * r;
-    graffiti.drawAreaMainCanvas.height = h * r;
-    graffiti.drawAreaStrokeCanvas.width = w * r;
-    graffiti.drawAreaStrokeCanvas.height = h * r;
-    graffiti.drawAreaMainContext.scale(r, r);
-    graffiti.drawAreaStrokeContext.scale(r, r);
-  },
-
   drawAreaUpdateOffset: function() {
     graffiti.drawAreaWrapOffset = getXY(graffiti.drawAreaWrap);
   },
 
   // draw
 
-  draw: function(ctx, history) {
+  draw: function(ctx, history) { 
     var strokes = undefined;
     var recursive = false;
     if(history) {
@@ -378,24 +386,26 @@ var graffiti = {
   historyStepBackLock: 0,
 
   historyAddStep: function(strokes, brush) {
-    graffiti.history.push([strokes, brush]);
+    graffiti.history.push([strokes, brush, graffiti.scaleFactor]);
     if(graffiti.history.length == graffiti.historyLimit * 2) {
       var data = graffiti.canvasCloneGetData();
       var checkPointStrokes = graffiti.history.splice(0, graffiti.historyLimit);
+      checkPointStrokes = graffiti.historyNormalizeToFactor(checkPointStrokes, graffiti.scaleFactor);
       if(graffiti.historyCheckpoint) {
         var image = new Image();
         image.onload = function() {
-          graffiti.drawAreaStrokeContext.drawImage(image, 0, 0, data[0], data[1]);
-          graffiti.draw(graffiti.drawAreaStrokeContext, checkPointStrokes);
-          graffiti.historyCheckpoint = graffiti.drawAreaStrokeCanvas.toDataURL("image/png", 1);
-          graffiti.drawAreaStrokeContext.clearRect(0, 0, data[2], data[3]);
+          graffiti.drawAreaHistoryContext.drawImage(image, 0, 0, data[4], data[5]);
+          resolveAsynch();
         }
         image.src = graffiti.historyCheckpoint;
       } else {
-        graffiti.draw(graffiti.drawAreaStrokeContext, checkPointStrokes);
-        graffiti.historyCheckpoint = graffiti.drawAreaStrokeCanvas.toDataURL("image/png", 1);
-        graffiti.drawAreaStrokeContext.clearRect(0, 0, data[2], data[3]);
+        resolveAsynch();
       }
+    }
+    function resolveAsynch() {
+      graffiti.draw(graffiti.drawAreaHistoryContext, checkPointStrokes);
+      graffiti.historyCheckpoint = graffiti.drawAreaHistoryCanvas.toDataURL("image/png", 1);
+      graffiti.drawAreaHistoryContext.clearRect(0, 0, data[4], data[5]);
     }
   },
 
@@ -425,7 +435,7 @@ var graffiti = {
       }
     }
     function resolveAsynch() {
-      graffiti.draw(graffiti.drawAreaMainContext, graffiti.history);
+      graffiti.draw(graffiti.drawAreaMainContext, graffiti.history, 2);
       animate(graffiti.drawAreaStrokeCanvas, { opacity : 0 }, 200, function() {
         graffiti.drawAreaStrokeContext.clearRect(0, 0, data[2], data[3]);
         graffiti.drawAreaStrokeCanvas.style.backgroundColor = "transparent";
@@ -435,12 +445,26 @@ var graffiti = {
     }
   },
 
+  historyNormalizeToFactor: function(history, factor) {
+    history = history.slice();
+    for(var i = 0; i < history.length; i++) {
+      history[i][1][0] = history[i][1][0] / history[i][2] * factor;
+      for(var j = 0; j < history[i][0].length; j++) {
+        history[i][0][j][0] = history[i][0][j][0] / history[i][2] * factor;
+        history[i][0][j][1] = history[i][0][j][1] / history[i][2] * factor;
+      }
+    }
+    return history;
+  },
+
   canvasCloneGetData: function() {
     return [
             parseInt(graffiti.drawAreaWrap.style.width),
             parseInt(graffiti.drawAreaWrap.style.height),
             graffiti.drawAreaMaxWidth,
-            graffiti.drawAreaMaxHeight
+            graffiti.drawAreaMaxHeight,
+            graffiti.drawAreaHistoryCanvas.width,
+            graffiti.drawAreaStrokeCanvas.height
            ];
   },
 
@@ -478,9 +502,33 @@ var graffiti = {
   },
 
   resizeFinish: function() {
-    graffiti.resizing = 0;
-    graffiti.drawAreaStrokeCanvas.style.top = "-" + graffiti.drawAreaCurHeight + "px";
-    graffiti.drawAreaUpdateOffset();
+    if(graffiti.resizing == 1) {
+      graffiti.resizing = 0;
+      graffiti.drawAreaStrokeCanvas.style.top = "-" + graffiti.drawAreaCurHeight + "px";
+      graffiti.drawAreaUpdateOffset();
+      graffiti.scaleFactor = graffiti.drawAreaHistoryCanvas.width / graffiti.drawAreaCurWidth;
+      graffiti.drawAreaMainCanvas.width = graffiti.drawAreaCurWidth * window.devicePixelRatio;
+      graffiti.drawAreaMainCanvas.height = graffiti.drawAreaCurHeight * window.devicePixelRatio;
+      graffiti.drawAreaStrokeCanvas.width = graffiti.drawAreaCurWidth * window.devicePixelRatio;
+      graffiti.drawAreaStrokeCanvas.height = graffiti.drawAreaCurHeight * window.devicePixelRatio;
+      //graffiti.drawAreaStrokeContext.scale(window.devicePixelRatio, window.devicePixelRatio);
+      //graffiti.drawAreaMainContext.scale(window.devicePixelRatio, window.devicePixelRatio);
+      var data = graffiti.canvasCloneGetData();
+      if(graffiti.historyCheckpoint) {
+        var image = new Image();
+        image.onload = function() {
+          graffiti.drawAreaMainContext.drawImage(image, 0, 0, data[2], data[3]);
+          resolveAsynch();
+        }
+      } else {
+        resolveAsynch();
+      }
+      function resolveAsynch() {
+        var h = graffiti.historyNormalizeToFactor(graffiti.history, graffiti.scaleFactor);
+        graffiti.draw(graffiti.drawAreaMainContext, h);
+      }
+
+    }
   }
 
 };
