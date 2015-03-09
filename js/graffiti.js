@@ -337,7 +337,7 @@ var graffiti = {
     if(history) {
       history = history.slice();
       if(history.length != 0) {
-        var step = history.pop();
+        var step = history.shift();
         strokes = graffiti.drawGetNormalizedStrokes(step[0], step[2], ratio);
         recursive = true;
       } else {
