@@ -45,7 +45,7 @@ var graffiti = {
   },
 
   attachEvents: function() {
-    document.addEventListener("mousemove", function() {
+    document.addEventListener("mousemove", function(event) {
       event.preventDefault();
       graffiti.sliderMouseMove(event);
       graffiti.drawAreaAdvanceStroke(event);
@@ -58,6 +58,12 @@ var graffiti = {
     }, false);
     window.addEventListener("resize", function() {
       graffiti.drawAreaUpdateOffset();
+    }, true);
+    document.addEventListener("selectstart", function(event) {
+      event.preventDefault();
+    }, true);
+    document.addEventListener("keypress", function(event) {
+      graffiti.shortCutHandle(event);
     }, true);
   },
 
@@ -607,6 +613,28 @@ var graffiti = {
                 stroke-width="' + size + '" stroke-linecap="round" stroke-linejoin="round" />';
     return chunk;
   },
+
+  // shortcuts
+
+  shortCutHandle: function(event) {
+    event.preventDefault();
+    if(event.ctrlKey == 1) {
+      switch(event.keyCode) {
+        // ctrl + z
+        case 26:
+          graffiti.historyStepBack();
+        break;
+        // ctrl + n (new)
+        case 14:
+          graffiti.drawAreaErase();
+        break;
+        // ctrl + s (save)
+        case 19:
+          graffiti.export();
+        break;
+      }
+    }
+  }
 
 };
 
