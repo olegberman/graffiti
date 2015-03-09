@@ -305,6 +305,7 @@ var graffiti = {
       graffiti.drawAreaMainCanvas.style.opacity = "1";
     });
     graffiti.history = [];
+    graffiti.historyGlobal = [];
     graffiti.historyCheckpoint = null;
   },
 
@@ -379,11 +380,12 @@ var graffiti = {
     if(recursive) graffiti.draw(ctx, history, ratio);
   },
 
-  drawGetNormalizedStrokes: function(strokes, oldRatio, newRatio) {
+  drawGetNormalizedStrokes: function(strokes, oldRatio, newRatio, ignoreRetina) {
     strokes = strokes.slice();
     oldRatio = oldRatio ? oldRatio : graffiti.resizeRatio;
     newRatio = newRatio ? newRatio : graffiti.resizeRatio;
-    var ratio = newRatio / oldRatio * graffiti.pixelRatio;
+    var pixelRatio = ignoreRetina ? 1 : graffiti.pixelRatio;
+    var ratio = newRatio / oldRatio * pixelRatio;
     for(var i = 0; i < strokes.length; i++) {
       strokes[i] = strokes[i].slice();
       if(!strokes[i][2]) {
@@ -395,6 +397,11 @@ var graffiti = {
     return strokes;
   },
 
+  drawGetNormalizedBrushSize: function(brushSize, ratio, ignoreRetina) {
+    var pixelRatio = ignoreRetina ? 1 : graffiti.pixelRatio;
+    return brushSize * (ratio ? ratio : graffiti.resizeRatio) * pixelRatio;
+  },
+
   drawUnflagStrokes: function(strokes) {
     strokes = strokes.slice();
     for(var i = 0; i < strokes.length; i++) {
@@ -403,18 +410,16 @@ var graffiti = {
     return strokes;
   },
 
-  drawGetNormalizedBrushSize: function(brushSize, ratio) {
-    return brushSize * (ratio ? ratio : graffiti.resizeRatio) * graffiti.pixelRatio;
-  },
-
   // history
 
   history: [],
+  historyGlobal: [],
   historyCheckpoint: undefined,
   historyStepBackLock: 0,
 
   historyAddStep: function(strokes, brush, resizeRatio) {
     graffiti.history.push([strokes, brush, resizeRatio]);
+    graffiti.historyGlobal.push([strokes, brush, resizeRatio]);
     if(graffiti.history.length == graffiti.historyLimit * 2) {
       var data = graffiti.drawAreaGetData();
       var checkPointStrokes = graffiti.history.splice(0, graffiti.historyLimit);
@@ -447,6 +452,7 @@ var graffiti = {
     } else {
       graffiti.historyStepBackLock = 1;
       graffiti.history.pop();
+      graffiti.historyGlobal.pop();
       graffiti.drawAreaStrokeContext.drawImage(graffiti.drawAreaMainCanvas, 0, 0, data[2], data[3]);
       graffiti.drawAreaStrokeCanvas.style.backgroundColor = "#ffffff";
       graffiti.drawAreaMainContext.clearRect(0, 0, data[2], data[3]);
@@ -540,7 +546,67 @@ var graffiti = {
         graffiti.draw(graffiti.drawAreaMainContext, graffiti.history);
       }
     }
-  }
+  },
+
+  // export
+
+  exportLock: 0,
+
+  export: function() {
+    if(graffiti.historyGlobal.length == 0) return false;
+    graffiti.exportLock = 1;
+    var history = graffiti.historyGlobal.slice();
+    var maxW = graffiti.drawAreaMaxWidth;
+    var maxH = graffiti.drawAreaMaxHeight;
+    var file = '<?xml version="1.0" standalone="yes"?>\
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd"> \
+<svg width="' + maxW + 'px" height="' + maxH + 'px" viewBox="0 0 ' + maxW + ' ' + maxH + '" xmlns="http://www.w3.org/2000/svg" version="1.1">';
+    for(var i = 0; i < history.length; i++) {
+      file += graffiti.exportGetChunk(history[i]);
+    }
+    file += '</svg>';
+    window.open("data:image/svg+xml," + encodeURIComponent(file));
+  },
+
+  exportGetChunk: function(step) {
+    var chunk = '<path d="';
+    var strokes = graffiti.drawGetNormalizedStrokes(step[0], step[2], graffiti.maxResizeRatio, true);
+    var size = graffiti.drawGetNormalizedBrushSize(step[1][0], graffiti.maxResizeRatio, true);
+    var color = step[1][1];
+    var opacity = step[1][2];
+    if(strokes.length < 2) {
+      chunk += "M" + strokes[0][0] + "," + strokes[0][1] + " ";
+      chunk += "L" + (strokes[0][0] + 0.51) + "," + strokes[0][1] + " ";
+      chunk += '" fill="none" stroke="rgb(' + color + ')" stroke-opacity="' + opacity + '\
+      " stroke-width="' + size + '" stroke-linecap="round" stroke-linejoin="round" />';
+      return chunk;
+    }
+    chunk += "M" + strokes[0][0] + "," + strokes[0][1] + " ";
+    chunk += "L" + ((strokes[0][0] + strokes[1][0]) * 0.5) + "," +
+                   ((strokes[0][1] + strokes[1][1]) * 0.5) + " ";
+    var i = 0;
+    while(++i < (strokes.length - 1)) {
+        var abs1 = Math.abs(strokes[i - 1][0] - strokes[i][0])
+                 + Math.abs(strokes[i - 1][1] - strokes[i][1])
+                 + Math.abs(strokes[i][0] - strokes[i + 1][0])
+                 + Math.abs(strokes[i][1] - strokes[i + 1][1]);
+        var abs2 = Math.abs(strokes[i - 1][0] - strokes[i + 1][0])
+                 + Math.abs(strokes[i - 1][1] -  strokes[i + 1][1]);
+    if(abs1 > 10 && abs2 > abs1 * 0.8) {
+      chunk += "Q" + strokes[i][0] + "," + strokes[i][1] + " " 
+                   + ((strokes[i][0] + strokes[i + 1][0]) * 0.5) + "," 
+                   + ((strokes[i][1] + strokes[i + 1][1]) * 0.5) + " ";
+      continue;
+    }
+    chunk += "L" + strokes[i][0] + "," + strokes[i][1] + " ";
+    chunk += "L" + ((strokes[i][0] + strokes[i + 1][0]) * 0.5) + "," 
+                 + ((strokes[i][1] + strokes[i + 1][1]) * 0.5) + " ";
+    }
+    chunk += "L" + strokes[strokes.length - 1][0] + "," + strokes[strokes.length - 1][1] + " ";
+    chunk += '" fill="none" stroke="rgb(' + color + ')" stroke-opacity="' + opacity + '" \
+                stroke-width="' + size + '" stroke-linecap="round" stroke-linejoin="round" />';
+    return chunk;
+  },
 
 };
 
