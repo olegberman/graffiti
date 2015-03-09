@@ -66,7 +66,7 @@ var graffiti = {
   brushPreviewInit: function() {
     graffiti.brushPreviewCanvas = ge("graffiti_brush_canvas");
     graffiti.brushPreviewContext = graffiti.brushPreviewCanvas.getContext("2d");
-    graffiti.brushPreviewContext.scale(graffiti.pixelRatio, graffiti.pixelRatio);
+    graffiti.brushPreviewContext.scale(2, 2);
     graffiti.brushPreviewUpdate();
   },
 
