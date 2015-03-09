@@ -7,6 +7,10 @@
     <script type="text/javascript" src="js/graffiti.js"></script>
   </head>
   <body>
+    <div id="graffiti_utils">
+      <div id="graffiti_colorpicker_cell_active" onclick="graffiti.colorPickerChooseColor();"></div>
+      <canvas id="graffiti_canvas_history" width="1240" height="620"></canvas>
+    </div>
     <div id="shade">
       <div id="popup_wrap" class="center">
         <div id="popup_header">Graffiti to Oleg's Wall</div>
@@ -65,9 +69,6 @@
                 </div>
               </div>
             </div>
-          </div>
-          <div id="graffiti_utils">
-            <div id="graffiti_colorpicker_cell_active" onclick="graffiti.colorPickerChooseColor();"></div>
           </div>
         </div>
       </div>
