@@ -619,6 +619,7 @@ var graffiti = {
   shortCutHandle: function(event) {
     event.preventDefault();
     if(event.ctrlKey == 1) {
+      console.log(event);
       switch(event.keyCode) {
         // ctrl + z
         case 26:
@@ -632,9 +633,25 @@ var graffiti = {
         case 19:
           graffiti.export();
         break;
+        // eastern
+        case 4:
+          if(event.altKey) {
+            var words = ["much art", "wow", "cool", "what r you drawing", "concern", "very graffiti", "amaze", "u found eastern"];
+            graffiti.drawAreaMainContext.fillStyle = "rgb(" + Math.round(rand(0, 255)) 
+                                                     + ", " + Math.round(rand(0, 255))
+                                                     + ", " + Math.round(rand(0, 255)) + ")";
+            console.log("rgb(" + rand(0, 255) 
+                                                     + ", " + rand(0, 255)
+                                                     + ", " + rand(0, 255) + ")");
+            graffiti.drawAreaMainContext.font = Math.round(rand(20, 40)) + "px Comic Sans MS";
+            var w = graffiti.drawAreaCurWidth * graffiti.pixelRatio;
+            var h = graffiti.drawAreaCurHeight * graffiti.pixelRatio;
+            graffiti.drawAreaMainContext.fillText(words[Math.floor(rand(0, words.length - 1))], rand(0, w), rand(0, h));
+          }
+        break;
       }
     }
-  }
+  },
 
 };
 
