@@ -2,6 +2,7 @@ var graffiti = {
 
   brush: [20, "95, 127, 162", 1], // size, rgb color, opacity
   strokes: [],
+
   drawAreaCurWidth: 620,
   drawAreaCurHeight: 310,
   drawAreaMinWidth: 620,
@@ -10,6 +11,7 @@ var graffiti = {
   drawAreaMaxHeight: 620,
   historyLimit: 50,
 
+  touchDevice: 0,
   pixelRatio: window.devicePixelRatio || 1,
   resizeRatio: 1,
   maxResizeRatio: 2,
@@ -30,6 +32,10 @@ var graffiti = {
   resizer: undefined,
 
   init: function() {
+    var ua = navigator.userAgent.toLowerCase();
+    if(/android|iphone|ipod|ipad|opera mini|opera mobi/i.test(useragent)) {
+      graffiti.touchDevice = 1;
+    }
     graffiti.attachEvents();
     graffiti.colorPickerInit();
     graffiti.brushPreviewInit();
@@ -45,13 +51,18 @@ var graffiti = {
   },
 
   attachEvents: function() {
-    document.addEventListener("mousemove", function(event) {
+    var touch = graffiti.touchDevice;
+    document.addEventListener((touch ? "touchmove" : "mousemove"), function(event) {
+      if(touch) {
+        event.pageX = event.touches[0].pageX;
+        event.pageY = event.touches[0].pageY;
+      }
       event.preventDefault();
       graffiti.sliderMouseMove(event);
       graffiti.drawAreaAdvanceStroke(event);
       graffiti.resize(event);
     }, false);
-    document.addEventListener("mouseup", function() {
+    document.addEventListener((touch ? "touchend" : "mouseup"), function() {
       graffiti.sliderMouseUp();
       graffiti.drawAreaFinishStroke();
       graffiti.resizeFinish();
@@ -65,6 +76,7 @@ var graffiti = {
     document.addEventListener("keypress", function(event) {
       graffiti.shortCutHandle(event);
     }, true);
+    
   },
 
   // brush preview
@@ -429,21 +441,28 @@ var graffiti = {
     if(graffiti.history.length == graffiti.historyLimit * 2) {
       var data = graffiti.drawAreaGetData();
       var checkPointStrokes = graffiti.history.splice(0, graffiti.historyLimit);
-      if(graffiti.historyCheckpoint) {
-        var image = new Image();
-        image.onload = function() {
-          graffiti.drawAreaHistoryContext.drawImage(image, 0, 0, data[4], data[5]);
-          resolveAsynch();
-        }
-        image.src = graffiti.historyCheckpoint;
-      } else {
+      graffiti.historyDrawToCanvas(checkPointStrokes, function() {
+        graffiti.historyCheckpoint = graffiti.drawAreaHistoryCanvas.toDataURL("image/png", 1);
+        graffiti.drawAreaHistoryContext.clearRect(0, 0, data[4], data[5]);
+      });
+    }
+  },
+
+  historyDrawToCanvas: function(strokes, callback) {
+    var data = graffiti.drawAreaGetData();
+    if(graffiti.historyCheckpoint) {
+      var image = new Image();
+      image.onload = function() {
+        graffiti.drawAreaHistoryContext.drawImage(image, 0, 0, data[4], data[5]);
         resolveAsynch();
       }
+      image.src = graffiti.historyCheckpoint;
+    } else {
+      resolveAsynch();
     }
     function resolveAsynch() {
-      graffiti.draw(graffiti.drawAreaHistoryContext, checkPointStrokes, graffiti.maxResizeRatio);
-      graffiti.historyCheckpoint = graffiti.drawAreaHistoryCanvas.toDataURL("image/png", 1);
-      graffiti.drawAreaHistoryContext.clearRect(0, 0, data[4], data[5]);
+      graffiti.draw(graffiti.drawAreaHistoryContext, strokes, graffiti.maxResizeRatio);
+      callback();
     }
   },
 
@@ -558,7 +577,7 @@ var graffiti = {
 
   exportLock: 0,
 
-  export: function() {
+  exportSvg: function() {
     if(graffiti.historyGlobal.length == 0) return false;
     graffiti.exportLock = 1;
     var history = graffiti.historyGlobal.slice();
@@ -568,13 +587,13 @@ var graffiti = {
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd"> \
 <svg width="' + maxW + 'px" height="' + maxH + 'px" viewBox="0 0 ' + maxW + ' ' + maxH + '" xmlns="http://www.w3.org/2000/svg" version="1.1">';
     for(var i = 0; i < history.length; i++) {
-      file += graffiti.exportGetChunk(history[i]);
+      file += graffiti.exportSvgGetChunk(history[i]);
     }
     file += '</svg>';
     window.open("data:image/svg+xml," + encodeURIComponent(file));
   },
 
-  exportGetChunk: function(step) {
+  exportSvgGetChunk: function(step) {
     var chunk = '<path d="';
     var strokes = graffiti.drawGetNormalizedStrokes(step[0], step[2], graffiti.maxResizeRatio, true);
     var size = graffiti.drawGetNormalizedBrushSize(step[1][0], graffiti.maxResizeRatio, true);
@@ -614,7 +633,15 @@ var graffiti = {
     return chunk;
   },
 
+  exportImage: function(callback) {
+    graffiti.historyDrawToCanvas(graffiti.history, function() {
+      callback(graffiti.drawAreaHistoryCanvas.toDataURL("image/png", 1));
+    });
+  },
+
   // shortcuts
+
+  shortCutEastern: 0,
 
   shortCutHandle: function(event) {
     event.preventDefault();
@@ -634,20 +661,17 @@ var graffiti = {
           graffiti.export();
         break;
         // eastern
-        case 4:
-          if(event.altKey) {
-            var words = ["much art", "wow", "cool", "what r you drawing", "concern", "very graffiti", "amaze", "u found eastern"];
-            graffiti.drawAreaMainContext.fillStyle = "rgb(" + Math.round(rand(0, 255)) 
-                                                     + ", " + Math.round(rand(0, 255))
-                                                     + ", " + Math.round(rand(0, 255)) + ")";
-            console.log("rgb(" + rand(0, 255) 
-                                                     + ", " + rand(0, 255)
-                                                     + ", " + rand(0, 255) + ")");
-            graffiti.drawAreaMainContext.font = Math.round(rand(20, 40)) + "px Comic Sans MS";
-            var w = graffiti.drawAreaCurWidth * graffiti.pixelRatio;
-            var h = graffiti.drawAreaCurHeight * graffiti.pixelRatio;
-            graffiti.drawAreaMainContext.fillText(words[Math.floor(rand(0, words.length - 1))], rand(0, w), rand(0, h));
-          }
+        case 59:
+          if(graffiti.shortCutEastern) return false;
+          graffiti.shortCutEastern = 1;
+          var words = ["much art", "wow", "cool", "what r you drawing", "very graffiti", "amaze", "u found eastern"];
+          graffiti.drawAreaMainContext.fillStyle = "rgb(" + Math.round(rand(0, 255)) 
+                                                   + ", " + Math.round(rand(0, 255))
+                                                   + ", " + Math.round(rand(0, 255)) + ")";
+          graffiti.drawAreaMainContext.font = Math.round(rand(20, 40)) + "px Comic Sans MS";
+          var w = graffiti.drawAreaCurWidth * graffiti.pixelRatio;
+          var h = graffiti.drawAreaCurHeight * graffiti.pixelRatio;
+          graffiti.drawAreaMainContext.fillText(words[Math.floor(rand(0, words.length - 1))], rand(0, w), rand(0, h));
         break;
       }
     }
