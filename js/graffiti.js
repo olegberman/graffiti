@@ -11,7 +11,7 @@ var graffiti = {
   drawAreaMaxHeight: 620,
   historyLimit: 50,
 
-  touchDevice: 0,
+  touch: 0,
   pixelRatio: window.devicePixelRatio || 1,
   resizeRatio: 1,
   maxResizeRatio: 2,
@@ -34,9 +34,9 @@ var graffiti = {
   init: function() {
     var ua = navigator.userAgent.toLowerCase();
     if(/android|iphone|ipod|ipad|opera mini|opera mobi/i.test(ua)) {
-      graffiti.touchDevice = 1;
+      graffiti.touch = 1;
     }
-    graffiti.attachEvents();
+    graffiti.eventsAttach();
     graffiti.colorPickerInit();
     graffiti.brushPreviewInit();
     graffiti.drawAreaInit();
@@ -49,34 +49,51 @@ var graffiti = {
                         ge("graffiti_slider_opacity_thumb"), 
                         80);
     graffiti.resizer = ge("graffiti_resize_wrap");
-    graffiti.resizer.addEventListener(graffiti.touchDevice ? "touchstart" : "mousedown", function() {
+    graffiti.resizer.addEventListener(graffiti.touch ? "touchstart" : "mousedown", function() {
       graffiti.resizeBegin();
     });
   },
 
-  attachEvents: function() {
-    var touch = graffiti.touchDevice;
-    document.addEventListener((touch ? "touchmove" : "mousemove"), function(event) {
-      if(touch) event.pageX = event.touches[0].pageX, event.pageY = event.touches[0].pageY;
-      event.preventDefault();
-      graffiti.sliderMouseMove(event);
-      graffiti.drawAreaAdvanceStroke(event);
-      graffiti.resize(event);
-    }, false);
-    document.addEventListener((touch ? "touchend" : "mouseup"), function() {
-      graffiti.sliderMouseUp();
-      graffiti.drawAreaFinishStroke();
-      graffiti.resizeFinish();
-    }, false);
-    window.addEventListener("resize", function() {
-      graffiti.drawAreaUpdateOffset();
-    }, true);
-    document.addEventListener("selectstart", function(event) {
-      event.preventDefault();
-    }, true);
-    document.addEventListener("keypress", function(event) {
-      graffiti.shortCutHandle(event);
-    }, true);
+  deInit: function() {
+    graffiti.history = [];
+    graffiti.historyGlobal = [];
+    graffiti.historyCheckpoint = null;
+  },
+
+  // events
+
+  eventsAttach: function() {
+    document.addEventListener((graffiti.touch ? "touchmove" : "mousemove"), graffiti.eventsMouseMove, false);
+    document.addEventListener((graffiti.touch ? "touchend" : "mouseup"), graffiti.eventsMouseUp, false);
+    window.addEventListener("resize", graffiti.eventsWindowResize, true);
+    document.addEventListener("selectstart", graffiti.eventsSelectStart, true);
+    document.addEventListener("keypress", graffiti.eventsKeyPress, true);
+  },
+
+  eventsMouseMove: function(event) {
+    if(graffiti.touch) event.pageX = event.touches[0].pageX, event.pageY = event.touches[0].pageY;
+    event.preventDefault();
+    graffiti.sliderMouseMove(event);
+    graffiti.drawAreaAdvanceStroke(event);
+    graffiti.resize(event);
+  },
+
+  eventsMouseUp: function(event) {
+    graffiti.sliderMouseUp();
+    graffiti.drawAreaFinishStroke();
+    graffiti.resizeFinish();
+  },
+
+  eventsWindowResize: function() {
+    graffiti.drawAreaUpdateOffset();
+  },
+
+  eventsSelectStart: function(event) {
+    event.preventDefault();
+  },
+
+  eventsKeyPress: function(event) {
+    graffiti.shortCutHandle(event);
   },
 
   // brush preview
@@ -194,8 +211,8 @@ var graffiti = {
   sliderActive: {},
 
   sliderInit: function(id, wrapper, thumb, value) {
-    wrapper.addEventListener((graffiti.touchDevice ? "touchstart" : "mousedown"), function(event) {
-      if(graffiti.touchDevice) event.pageX = event.touches[0].pageX, event.pageY = event.touches[0].pageY;
+    wrapper.addEventListener((graffiti.touch ? "touchstart" : "mousedown"), function(event) {
+      if(graffiti.touch) event.pageX = event.touches[0].pageX, event.pageY = event.touches[0].pageY;
       graffiti.sliderMouseDown(id, event);
     });
     graffiti.sliders[id] = {id: id, wrapper: wrapper, thumb: thumb, value: value};
@@ -277,8 +294,8 @@ var graffiti = {
 
   drawAreaInit: function() {
     graffiti.drawAreaWrap = ge("graffiti_drawarea_wrap");
-    graffiti.drawAreaWrap.addEventListener((graffiti.touchDevice ? "touchstart" : "mousedown"), function(event) {
-      if(graffiti.touchDevice) event.pageX = event.touches[0].pageX, event.pageY = event.touches[0].pageY;
+    graffiti.drawAreaWrap.addEventListener((graffiti.touch ? "touchstart" : "mousedown"), function(event) {
+      if(graffiti.touch) event.pageX = event.touches[0].pageX, event.pageY = event.touches[0].pageY;
       graffiti.drawAreaBeginStroke(event);
     });
     graffiti.drawAreaMainCanvas = ge("graffiti_canvas_main");
@@ -650,23 +667,23 @@ var graffiti = {
 
   shortCutHandle: function(event) {
     event.preventDefault();
-    if(event.ctrlKey == 1) {
+    if(event.shiftKey) {
       console.log(event);
       switch(event.keyCode) {
         // ctrl + z
-        case 26:
+        case 90:
           graffiti.historyStepBack();
         break;
-        // ctrl + n (new)
-        case 14:
+        // ctrl + e (erase)
+        case 78:
           graffiti.drawAreaErase();
         break;
         // ctrl + s (save)
-        case 19:
-          graffiti.export();
+        case 83:
+          graffiti.exportSvg();
         break;
         // eastern
-        case 59:
+        case 41:
           if(graffiti.shortCutEastern) return false;
           graffiti.shortCutEastern = 1;
           var words = ["much art", "wow", "cool", "what r you drawing", "very graffiti", "amaze", "u found eastern"];
@@ -677,6 +694,11 @@ var graffiti = {
           var w = graffiti.drawAreaCurWidth * graffiti.pixelRatio;
           var h = graffiti.drawAreaCurHeight * graffiti.pixelRatio;
           graffiti.drawAreaMainContext.fillText(words[Math.floor(rand(0, words.length - 1))], rand(0, w), rand(0, h));
+        break;
+        case 68:
+          graffiti.exportImage(function(file) {
+            window.open(file);
+          });
         break;
       }
     }
