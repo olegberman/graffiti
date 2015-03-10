@@ -49,12 +49,16 @@ var graffiti = {
                         ge("graffiti_slider_opacity_thumb"), 
                         80);
     graffiti.resizer = ge("graffiti_resize_wrap");
-    graffiti.resizer.addEventListener(graffiti.touch ? "touchstart" : "mousedown", function() {
-      graffiti.resizeBegin();
-    });
+    graffiti.resizer.addEventListener(graffiti.touch ? "touchstart" : "mousedown", graffiti.resizeBegin, false);
   },
 
   deInit: function() {
+    document.removeEventListener((graffiti.touch ? "touchmove" : "mousemove"), graffiti.eventsMouseMove, false);
+    document.removeEventListener((graffiti.touch ? "touchend" : "mouseup"), graffiti.eventsMouseUp, false);
+    window.removeEventListener("resize", graffiti.eventsWindowResize, true);
+    document.removeEventListener("selectstart", graffiti.eventsSelectStart, true);
+    document.removeEventListener("keypress", graffiti.eventsKeyPress, true);
+    graffiti.resizer.removeEventListener(graffiti.touch ? "touchstart" : "mousedown", graffiti.resizeBegin);
     graffiti.history = [];
     graffiti.historyGlobal = [];
     graffiti.historyCheckpoint = null;
@@ -211,10 +215,6 @@ var graffiti = {
   sliderActive: {},
 
   sliderInit: function(id, wrapper, thumb, value) {
-    wrapper.addEventListener((graffiti.touch ? "touchstart" : "mousedown"), function(event) {
-      if(graffiti.touch) event.pageX = event.touches[0].pageX, event.pageY = event.touches[0].pageY;
-      graffiti.sliderMouseDown(id, event);
-    });
     graffiti.sliders[id] = {id: id, wrapper: wrapper, thumb: thumb, value: value};
     var pixelPosition = (getSize(wrapper)[0] / 100 * value) + "px";
     animate(graffiti.sliders[id].thumb, {left : pixelPosition + "px"}, 300);
@@ -224,6 +224,7 @@ var graffiti = {
   },
 
   sliderMouseDown: function(id, event) {
+    if(graffiti.touch) event.pageX = event.touches[0].pageX, event.pageY = event.touches[0].pageY;
     graffiti.sliderActive = graffiti.sliders[id];
     graffiti.sliderMove(event);
   },
