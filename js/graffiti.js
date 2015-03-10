@@ -33,7 +33,7 @@ var graffiti = {
 
   init: function() {
     var ua = navigator.userAgent.toLowerCase();
-    if(/android|iphone|ipod|ipad|opera mini|opera mobi/i.test(useragent)) {
+    if(/android|iphone|ipod|ipad|opera mini|opera mobi/i.test(ua)) {
       graffiti.touchDevice = 1;
     }
     graffiti.attachEvents();
