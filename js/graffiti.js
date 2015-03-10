@@ -53,10 +53,7 @@ var graffiti = {
   attachEvents: function() {
     var touch = graffiti.touchDevice;
     document.addEventListener((touch ? "touchmove" : "mousemove"), function(event) {
-      if(touch) {
-        event.pageX = event.touches[0].pageX;
-        event.pageY = event.touches[0].pageY;
-      }
+      if(touch) event.pageX = event.touches[0].pageX, event.pageY = event.touches[0].pageY;
       event.preventDefault();
       graffiti.sliderMouseMove(event);
       graffiti.drawAreaAdvanceStroke(event);
@@ -273,6 +270,10 @@ var graffiti = {
 
   drawAreaInit: function() {
     graffiti.drawAreaWrap = ge("graffiti_drawarea_wrap");
+    graffiti.drawAreaWrap.addEventListener((graffiti.touchDevice ? "touchstart" : "mousedown"), function(event) {
+      if(graffiti.touchDevice) event.pageX = event.touches[0].pageX, event.pageY = event.touches[0].pageY;
+      graffiti.drawAreaBeginStroke(event);
+    });
     graffiti.drawAreaMainCanvas = ge("graffiti_canvas_main");
     graffiti.drawAreaMainContext = graffiti.drawAreaMainCanvas.getContext("2d");
     graffiti.drawAreaStrokeCanvas = ge("graffiti_canvas_stroke");
