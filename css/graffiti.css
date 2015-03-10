@@ -40,8 +40,10 @@ body {
   background-color: #ffffff;
 }
 
+/* Everything down below goes into production */
+
 #graffiti_wrap {
-  *width: 620px;
+  margin: 0 auto;
 }
 
 #graffiti_links {
@@ -54,13 +56,11 @@ body {
 .graffiti_link {
   font-size: 0.9em;
   color: #41658c;
-  transition: color 0.3s;
   text-decoration: none;
 }
 
 .graffiti_link:hover {
   text-decoration: underline;
-  transition: 0.3s;
 }
 
 #graffiti_utils {
@@ -97,6 +97,7 @@ body {
   width: 620px;
   overflow: hidden;
   height: 81px;
+  margin: 0 auto;
 }
 
 .graffiti_tools_section {
@@ -177,6 +178,8 @@ body {
 
 .graffiti_slider_caption {
   margin-top: 30px;
+  margin-left: auto;
+  margin-right: auto;
   color: #7c7f82;
 }
 

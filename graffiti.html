@@ -1,28 +1,42 @@
 <!doctype html>
 <html>
   <head>
-    <title> VK Experiments :: Graffiti </title>
-    <link rel="stylesheet" type="text/css" href="css/graffiti.css" />
+    <title> Graffiti </title>
+    <link rel="stylesheet" type="text/css" href="css/Graffiti.css" />
     <script type="text/javascript" src="js/common.js"></script>
-    <script type="text/javascript" src="js/graffiti.js"></script>
+    <script type="text/javascript" src="js/Graffiti.js"></script>
+    <script type="text/javascript">
+      document.addEventListener("DOMContentLoaded", function() {
+        Graffiti.init();
+      }, false);
+    </script>
   </head>
   <body>
+
+
+    <!-- this needs to be in the production -->
     <div id="graffiti_utils">
-      <div id="graffiti_colorpicker_cell_active" onclick="graffiti.colorPickerChooseColor();"></div>
+      <div id="graffiti_colorpicker_cell_active" onclick="Graffiti.colorPickerChooseColor();"></div>
       <canvas id="graffiti_canvas_history" width="1240" height="620"></canvas>
     </div>
+    <!-- /this needs to be in the production -->
+
+
     <div id="shade">
       <div id="popup_wrap" class="center">
-        <div id="popup_header">Graffiti App : Draw Something</div>
+        <div id="popup_header">Graffiti to Oleg's Wall</div>
         <div id="popup_content">
-          <div id="graffiti_wrap" class="center">
+
+
+          <!-- this needs to be in the production -->
+          <div id="graffiti_wrap">
             <div id="graffiti_links">
               <div class="fl_l">
-                <a href="#" class="graffiti_link" onclick="graffiti.historyStepBack(); return false;">Back</a> |
-                <a href="#" class="graffiti_link" onclick="graffiti.drawAreaErase(); return false;">Erase</a>
+                <a href="#" class="graffiti_link" onclick="Graffiti.historyStepBack(); return false;">Back</a> |
+                <a href="#" class="graffiti_link" onclick="Graffiti.drawAreaErase(); return false;">Erase</a>
               </div>
               <div class="fl_r">
-                <a href="#" class="graffiti_link" onclick="graffiti.exportSvg(); return false;">Save</a>
+                <a href="#" class="graffiti_link" onclick="Graffiti.exportSvg(); return false;">Save</a>
               </div>
             </div>
             <div id="graffiti_drawarea_border">
@@ -34,7 +48,7 @@
             <div id="graffiti_resize_wrap">
               <div id="graffiti_resize_line"></div>
             </div>
-            <div id="graffiti_tools" class="center">
+            <div id="graffiti_tools">
               <div id="graffiti_tools_brush" class="fl_l">
                 <canvas id="graffiti_brush_canvas" width="160" height="160"></canvas>
               </div>
@@ -42,7 +56,7 @@
                 <div class="graffiti_slider_caption">Color</div>
               </div>
               <div class="fl_l graffiti_tools_section" style="margin-left: 15px;">
-                <div id="graffiti_colorpreview_wrap" onclick="graffiti.colorPickerToggle();">
+                <div id="graffiti_colorpreview_wrap" onclick="Graffiti.colorPickerToggle();">
                   <div id="graffiti_colorpreview_arrow"></div>
                   <div id="graffiti_colorpreview_box"></div>
                 </div>
@@ -54,8 +68,8 @@
                 <div class="graffiti_slider_caption">Thickness</div>
               </div>
               <div class="fl_l">
-                <div id="graffiti_slider_thickness_wrap" class="graffiti_slider_wrap" onmousedown="graffiti.sliderMouseDown('thickness', event);" ontouchstart="graffiti.sliderMouseDown('thickness', event);" onmouseover="graffiti.sliderBeforeWheel('thickness');">
-                  <div class="graffiti_slider center"></div>
+                <div id="graffiti_slider_thickness_wrap" class="graffiti_slider_wrap" onmousedown="Graffiti.sliderMouseDown('thickness', event);" ontouchstart="Graffiti.sliderMouseDown('thickness', event);" onmouseover="Graffiti.sliderBeforeWheel('thickness');">
+                  <div class="graffiti_slider"></div>
                   <div id="graffiti_slider_thickness_thumb" class="graffiti_slider_thumb"></div>
                 </div>
               </div>
@@ -63,13 +77,17 @@
                 <div class="graffiti_slider_caption">Opacity</div>
               </div>
               <div class="fl_l">
-                <div id="graffiti_slider_opacity_wrap" class="graffiti_slider_wrap" onmousedown="graffiti.sliderMouseDown('opacity', event);" ontouchstart="graffiti.sliderMouseDown(id, event);" onmouseover="graffiti.sliderBeforeWheel('opacity');">
-                  <div class="graffiti_slider center"></div>
+                <div id="graffiti_slider_opacity_wrap" class="graffiti_slider_wrap" onmousedown="Graffiti.sliderMouseDown('opacity', event);" ontouchstart="Graffiti.sliderMouseDown('opacity', event);" onmouseover="Graffiti.sliderBeforeWheel('opacity');">
+                  <div class="graffiti_slider"></div>
                   <div id="graffiti_slider_opacity_thumb" class="graffiti_slider_thumb"></div>
                 </div>
               </div>
             </div>
           </div>
+          <!-- /this needs to be in the production -->
+
+
+
         </div>
       </div>
     </div>
