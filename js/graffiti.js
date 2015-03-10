@@ -73,7 +73,6 @@ var graffiti = {
     document.addEventListener("keypress", function(event) {
       graffiti.shortCutHandle(event);
     }, true);
-    
   },
 
   // brush preview
@@ -191,6 +190,10 @@ var graffiti = {
   sliderActive: {},
 
   sliderInit: function(id, wrapper, thumb, value) {
+    wrapper.addEventListener((graffiti.touchDevice ? "touchstart" : "mousedown"), function(event) {
+      if(graffiti.touchDevice) event.pageX = event.touches[0].pageX, event.pageY = event.touches[0].pageY;
+      graffiti.sliderMouseDown(id, event);
+    });
     graffiti.sliders[id] = {id: id, wrapper: wrapper, thumb: thumb, value: value};
     var pixelPosition = (getSize(wrapper)[0] / 100 * value) + "px";
     animate(graffiti.sliders[id].thumb, {left : pixelPosition + "px"}, 300);
