@@ -24,6 +24,8 @@ body {
 
 #popup_wrap {
   width: 642px;
+  -webkit-box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.35);
+  -moz-box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.35);
   box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.35);
   margin-top: 0px;
 }
@@ -54,13 +56,11 @@ body {
 .graffiti_link {
   font-size: 0.9em;
   color: #41658c;
-  transition: color 0.3s;
   text-decoration: none;
 }
 
 .graffiti_link:hover {
   text-decoration: underline;
-  transition: 0.3s;
 }
 
 #graffiti_utils {
@@ -113,6 +113,9 @@ body {
 }
 
 #graffiti_colorpreview_wrap:hover #graffiti_colorpreview_arrow {
+ -webkit-transition: order 0.3s linear;
+  -moz-transition: order 0.3s linear;
+  -o-transition: order 0.3s linear;
   transition: border 0.3s;
   border-bottom: 6px solid #506F95;
 }
@@ -145,6 +148,8 @@ body {
   width: 289px;
   height: 200px;
   border: 1px solid #ccc;
+  -webkit-box-shadow: 0 0 2px #ddd;
+  -moz-box-shadow: 0 0 2px #ddd;
   box-shadow: 0 0 2px #ddd;
   padding: 5px;
 }
@@ -191,6 +196,9 @@ body {
 .graffiti_slider {
   width: 140px;
   height: 7px;
+  -webkit-border-radius: 5px;
+  -khtml-border-radius: 5px;
+  -moz-border-radius: 5px;
   border-radius: 5px;
   background-color: #bac7d4;
 }
@@ -202,6 +210,9 @@ body {
   width: 13px;
   height: 13px;
   background-color: #6A89AF;
+  -webkit-border-radius: 50%;
+  -khtml-border-radius: 50%;
+  -moz-border-radius: 50%;
   border-radius: 50%;
 }
 
@@ -210,6 +221,8 @@ body {
   background: #f0f2f5;
   overflow: hidden;
   cursor: ns-resize;
+  -webkit-box-shadow: 0 1px 2px rgba(6, 33, 63, 0.1);
+  -moz-box-shadow: 0 1px 2px rgba(6, 33, 63, 0.1);
   box-shadow: 0 1px 2px rgba(6, 33, 63, 0.1);
   border-bottom: 1px solid #ddd;
 }

@@ -696,6 +696,7 @@ var graffiti = {
           var h = graffiti.drawAreaCurHeight * graffiti.pixelRatio;
           graffiti.drawAreaMainContext.fillText(words[Math.floor(rand(0, words.length - 1))], rand(0, w), rand(0, h));
         break;
+        // export raster image
         case 68:
           graffiti.exportImage(function(file) {
             window.open(file);
