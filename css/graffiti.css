@@ -140,7 +140,6 @@ body {
 
 #graffiti_colorpicker_wrap {
   display: none;
-  opacity: 0;
   position: absolute;
   z-index: 1;
   background-color: #fff;

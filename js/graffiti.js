@@ -167,9 +167,7 @@ var graffiti = {
     if(graffiti.colorPickerOpened == 0) {
       var position = getXY(ge("graffiti_colorpreview_wrap"));
       graffiti.colorPickerWrap.style.display = "block";
-      animate(graffiti.colorPickerWrap, { opacity: 1, 
-                                          top: position[1] - 230 },
-                                          100);
+      graffiti.colorPickerWrap.style.top = (position[1] - 230) + "px";
       graffiti.colorPickerOpened = 1;
     } else {
       graffiti.colorPickerHide();
@@ -179,12 +177,8 @@ var graffiti = {
   colorPickerHide: function() {
     var position = getXY(ge("graffiti_colorpreview_wrap"));
     graffiti.colorPickerActiveCell.style.display = "none";
-    animate(graffiti.colorPickerWrap, { opacity: 0, 
-                                        top: position[1] + 30 }, 
-                                        100,
-    function() {
-      graffiti.colorPickerWrap.style.display = "none";
-    });
+    graffiti.colorPickerWrap.style.top = (position[1] + 30) + "px";
+    graffiti.colorPickerWrap.style.display = "none";
     graffiti.colorPickerOpened = 0;
   },
 
@@ -217,7 +211,7 @@ var graffiti = {
   sliderInit: function(id, wrapper, thumb, value) {
     graffiti.sliders[id] = {id: id, wrapper: wrapper, thumb: thumb, value: value};
     var pixelPosition = (getSize(wrapper)[0] / 100 * value) + "px";
-    animate(graffiti.sliders[id].thumb, {left : pixelPosition + "px"}, 300);
+    graffiti.sliders[id].thumb.style.left = pixelPosition;
     wrapper.addEventListener("wheel", graffiti.sliderWheel, false);
     wrapper.addEventListener("DOMMouseScroll", graffiti.sliderWheel, false);
     graffiti.sliderUpdated(id);
@@ -344,10 +338,7 @@ var graffiti = {
 
   drawAreaErase: function() {
     var data = graffiti.drawAreaGetData();
-    animate(graffiti.drawAreaMainCanvas, {opacity: 0}, 200, function() {
-      graffiti.drawAreaMainContext.clearRect(0, 0, data[2], data[3]);
-      graffiti.drawAreaMainCanvas.style.opacity = "1";
-    });
+    graffiti.drawAreaMainContext.clearRect(0, 0, data[2], data[3]);
     graffiti.history = [];
     graffiti.historyGlobal = [];
     graffiti.historyCheckpoint = null;
@@ -504,8 +495,6 @@ var graffiti = {
       graffiti.historyStepBackLock = 1;
       graffiti.history.pop();
       graffiti.historyGlobal.pop();
-      graffiti.drawAreaStrokeContext.drawImage(graffiti.drawAreaMainCanvas, 0, 0, data[2], data[3]);
-      graffiti.drawAreaStrokeCanvas.style.backgroundColor = "#ffffff";
       graffiti.drawAreaMainContext.clearRect(0, 0, data[2], data[3]);
       if(graffiti.historyCheckpoint) {
         var image = new Image();
@@ -520,12 +509,7 @@ var graffiti = {
     }
     function resolveAsynch() {
       graffiti.draw(graffiti.drawAreaMainContext, graffiti.history);
-      animate(graffiti.drawAreaStrokeCanvas, { opacity : 0 }, 200, function() {
-        graffiti.drawAreaStrokeContext.clearRect(0, 0, data[2], data[3]);
-        graffiti.drawAreaStrokeCanvas.style.backgroundColor = "transparent";
-        graffiti.drawAreaStrokeCanvas.style.opacity = "1";
-        graffiti.historyStepBackLock = 0;
-      });
+      graffiti.historyStepBackLock = 0;
     }
   },
 
