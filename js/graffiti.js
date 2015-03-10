@@ -48,6 +48,10 @@ var graffiti = {
                         ge("graffiti_slider_opacity_wrap"),
                         ge("graffiti_slider_opacity_thumb"), 
                         80);
+    graffiti.resizer = ge("graffiti_resize_wrap");
+    graffiti.resizer.addEventListener(graffiti.touchDevice ? "touchstart" : "mousedown", function() {
+      graffiti.resizeBegin();
+    });
   },
 
   attachEvents: function() {
@@ -547,9 +551,6 @@ var graffiti = {
   },
 
   resizeBegin: function() {
-    if(!graffiti.resizer) {
-      graffiti.resizer = ge("graffiti_resize_wrap");
-    }
     graffiti.resizing = 1;
   },
 
