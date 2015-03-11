@@ -143,9 +143,8 @@ var Graffiti = {
     Graffiti.colorPicker = ge("graffiti_colorpicker");
     Graffiti.colorPickerActiveCell = ge("graffiti_colorpicker_cell_active");
     Graffiti.colorPreviewBox = ge("graffiti_colorpreview_box");
-    var position = getXY(ge("graffiti_colorpreview_wrap"));
-    Graffiti.colorPickerWrap.style.left = position[0] - 50 + "px";
-    Graffiti.colorPickerWrap.style.top = position[1] + 30 + "px";
+    var pos = getXY(ge("graffiti_colorpreview_wrap"));
+    Graffiti.colorPickerWrap.style.top = (pos[1] + 30) + "px";
     var html = "";
     var colors = [];
     for(var r = 0; r < 6; r++) {
@@ -177,13 +176,11 @@ var Graffiti = {
 
   colorPickerToggle: function() {
     if(Graffiti.colorPickerOpened == 0) {
-      var anchorPos = getXY(ge("graffiti_colorpreview_wrap"));
-      Graffiti.colorPickerWrap.style.left = anchorPos[0] - 50 + "px";
-      Graffiti.colorPickerWrap.style.top = anchorPos[1] + 30 + "px";
-      var position = getXY(ge("graffiti_colorpreview_wrap"));
+      var pos = getXY(ge("graffiti_colorpreview_wrap"));
+      Graffiti.colorPickerWrap.style.top = (pos[1] + 30) + "px";
       Graffiti.colorPickerWrap.style.display = "block";
       animate(Graffiti.colorPickerWrap, { opacity: 1,
-                                          top: position[1] - 230 },
+                                          top: pos[1] - 230 },
                                           100);
       Graffiti.colorPickerOpened = 1;
     } else {
@@ -207,10 +204,11 @@ var Graffiti = {
     if(Graffiti.colorPickerOpened) {
       var cleanRGB = target.style.backgroundColor.replace(/(rgb\(|\))/g, "")
       Graffiti.colorPickerLastHighlight = cleanRGB;
-      var position = getXY(target);
+      var boxPos = getXY(getByClass("box_layout")[0]);
+      var hlPos = getXY(target);
       Graffiti.colorPickerActiveCell.style.display = "block";
-      Graffiti.colorPickerActiveCell.style.left = position[0] + "px";
-      Graffiti.colorPickerActiveCell.style.top = position[1] + "px";
+      Graffiti.colorPickerActiveCell.style.left = (hlPos[0] - boxPos[0]) + "px";
+      Graffiti.colorPickerActiveCell.style.top = (hlPos[1] - boxPos[1]) + "px";
     } else {
       Graffiti.colorPickerActiveCell.style.display = "none";
     }
