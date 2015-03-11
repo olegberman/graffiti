@@ -36,7 +36,7 @@ var Graffiti = {
     if(/android|iphone|ipod|ipad|opera mini|opera mobi/i.test(ua)) {
       Graffiti.touch = 1;
     }
-    Graffiti.eventsAttach();
+    Graffiti.attachEvents();
     Graffiti.colorPickerInit();
     Graffiti.brushPreviewInit();
     Graffiti.drawAreaInit();
@@ -53,25 +53,33 @@ var Graffiti = {
   },
 
   deInit: function() {
+    Graffiti.history = [];
+    Graffiti.historyGlobal = [];
+    Graffiti.historyCheckpoint = null;
+    graffiti.detachEvents();
+  },
+
+  // events
+
+  attachEvents: function() {
+    addEvent(document, (Graffiti.touch ? "touchmove" : "mousemove"), Graffiti.eventsMouseMove);
+    addEvent(document, (Graffiti.touch ? "touchend" : "mouseup"), Graffiti.eventsMouseUp);
+    addEvent(window, "resize", Graffiti.eventsWindowResize);
+    addEvent(document, "selectstart", Graffiti.eventsSelectStart);
+    addEvent(document, "keypress", Graffiti.eventsKeyPress);
+  },
+
+  detachEvents: function() {
     removeEvent(document, (Graffiti.touch ? "touchmove" : "mousemove"), Graffiti.eventsMouseMove);
     removeEvent(document, (Graffiti.touch ? "touchend" : "mouseup"), Graffiti.eventsMouseUp);
     removeEvent(window, "resize", Graffiti.eventsWindowResize);
     removeEvent(document, "selectstart", Graffiti.eventsSelectStart);
     removeEvent(document, "keypress", Graffiti.eventsKeyPress);
     removeEvent(Graffiti.resizer, (Graffiti.touch ? "touchstart" : "mousedown"), Graffiti.resizeBegin);
-    Graffiti.history = [];
-    Graffiti.historyGlobal = [];
-    Graffiti.historyCheckpoint = null;
   },
 
-  // events
-
-  eventsAttach: function() {
-    addEvent(document, (Graffiti.touch ? "touchmove" : "mousemove"), Graffiti.eventsMouseMove);
-    addEvent(document, (Graffiti.touch ? "touchend" : "mouseup"), Graffiti.eventsMouseUp);
-    addEvent(window, "resize", Graffiti.eventsWindowResize);
-    addEvent(document, "selectstart", Graffiti.eventsSelectStart);
-    addEvent(document, "keypress", Graffiti.eventsKeyPress);
+  isChanged: function() {
+    return (Graffiti.historyGlobal.length || Graffiti.historyCheckpoint) ? true : false;
   },
 
   eventsMouseMove: function(event) {
