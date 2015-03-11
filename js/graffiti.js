@@ -98,6 +98,7 @@ var Graffiti = {
 
   eventsKeyPress: function(event) {
     Graffiti.shortCutHandle(event);
+    return cancelEvent(event);
   },
 
   // brush preview
@@ -666,7 +667,6 @@ var Graffiti = {
   shortCutEastern: 0,
 
   shortCutHandle: function(event) {
-    event.preventDefault();
     if(event.shiftKey) {
       console.log(event);
       switch(event.keyCode) {
@@ -677,23 +677,6 @@ var Graffiti = {
         // ctrl + e (erase)
         case 78:
           Graffiti.drawAreaErase();
-        break;
-        // ctrl + s (save)
-        case 83:
-          Graffiti.exportSvg();
-        break;
-        // eastern
-        case 41:
-          if(Graffiti.shortCutEastern) return false;
-          Graffiti.shortCutEastern = 1;
-          var words = ["much art", "wow", "cool", "what r you drawing", "very graffiti", "amaze", "u found eastern"];
-          Graffiti.drawAreaMainContext.fillStyle = "rgb(" + Math.round(rand(0, 255)) 
-                                                   + ", " + Math.round(rand(0, 255))
-                                                   + ", " + Math.round(rand(0, 255)) + ")";
-          Graffiti.drawAreaMainContext.font = Math.round(rand(20, 40)) + "px Comic Sans MS";
-          var w = Graffiti.drawAreaCurWidth * Graffiti.pixelRatio;
-          var h = Graffiti.drawAreaCurHeight * Graffiti.pixelRatio;
-          Graffiti.drawAreaMainContext.fillText(words[Math.floor(rand(0, words.length - 1))], rand(0, w), rand(0, h));
         break;
       }
     }
