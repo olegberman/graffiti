@@ -189,10 +189,10 @@ var Graffiti = {
   },
 
   colorPickerHide: function() {
-    var position = getXY(ge("graffiti_colorpreview_wrap"));
+    var pos = getXY(ge("graffiti_colorpreview_wrap"));
     Graffiti.colorPickerActiveCell.style.display = "none";
     animate(Graffiti.colorPickerWrap, { opacity: 0,
-                                        top: position[1] + 30 },
+                                        top: pos[1] + 30 },
                                         100,
     function() {
       Graffiti.colorPickerWrap.style.display = "none";
