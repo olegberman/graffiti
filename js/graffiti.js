@@ -1,3 +1,6 @@
+// Developed by Oleg Berman
+// http://vk.com/olegberman
+
 var Graffiti = {
 
   brush: [20, "95, 127, 162", 1], // size, rgb color, opacity
@@ -40,13 +43,13 @@ var Graffiti = {
     Graffiti.colorPickerInit();
     Graffiti.brushPreviewInit();
     Graffiti.drawAreaInit();
-    Graffiti.sliderInit("thickness", 
+    Graffiti.sliderInit("thickness",
                         ge("graffiti_slider_thickness_wrap"),
-                        ge("graffiti_slider_thickness_thumb"), 
+                        ge("graffiti_slider_thickness_thumb"),
                         40);
     Graffiti.sliderInit("opacity",
                         ge("graffiti_slider_opacity_wrap"),
-                        ge("graffiti_slider_opacity_thumb"), 
+                        ge("graffiti_slider_opacity_thumb"),
                         80);
     Graffiti.resizer = ge("graffiti_resize_wrap");
     addEvent(Graffiti.resizer, (Graffiti.touch ? "touchstart" : "mousedown"), Graffiti.resizeBegin);
@@ -56,7 +59,7 @@ var Graffiti = {
     Graffiti.history = [];
     Graffiti.historyGlobal = [];
     Graffiti.historyCheckpoint = null;
-    graffiti.detachEvents();
+    Graffiti.detachEvents();
   },
 
   // events
@@ -148,7 +151,7 @@ var Graffiti = {
     for(var r = 0; r < 6; r++) {
       for(var g = 0; g < 6; g++) {
         for(var b = 0; b < 6; b++) {
-          colors[r * 36 + g * 6 + b] = "rgb(" + (r / 5 * 255) + "," 
+          colors[r * 36 + g * 6 + b] = "rgb(" + (r / 5 * 255) + ","
           + (g / 5 * 255) + "," + (b / 5 * 255) + ")";
         }
       }
@@ -174,9 +177,12 @@ var Graffiti = {
 
   colorPickerToggle: function() {
     if(Graffiti.colorPickerOpened == 0) {
+      var anchorPos = getXY(ge("graffiti_colorpreview_wrap"));
+      Graffiti.colorPickerWrap.style.left = anchorPos[0] - 50 + "px";
+      Graffiti.colorPickerWrap.style.top = anchorPos[1] + 30 + "px";
       var position = getXY(ge("graffiti_colorpreview_wrap"));
       Graffiti.colorPickerWrap.style.display = "block";
-      animate(Graffiti.colorPickerWrap, { opacity: 1, 
+      animate(Graffiti.colorPickerWrap, { opacity: 1,
                                           top: position[1] - 230 },
                                           100);
       Graffiti.colorPickerOpened = 1;
@@ -188,8 +194,8 @@ var Graffiti = {
   colorPickerHide: function() {
     var position = getXY(ge("graffiti_colorpreview_wrap"));
     Graffiti.colorPickerActiveCell.style.display = "none";
-    animate(Graffiti.colorPickerWrap, { opacity: 0, 
-                                        top: position[1] + 30 }, 
+    animate(Graffiti.colorPickerWrap, { opacity: 0,
+                                        top: position[1] + 30 },
                                         100,
     function() {
       Graffiti.colorPickerWrap.style.display = "none";
@@ -299,7 +305,7 @@ var Graffiti = {
 
   drawAreaInUse: 0,
 
-  drawAreaWrapOffset: [], 
+  drawAreaWrapOffset: [],
 
   drawAreaInit: function() {
     Graffiti.drawAreaWrap = ge("graffiti_drawarea_wrap");
@@ -404,7 +410,7 @@ var Graffiti = {
       ctx.lineTo(strokes[0][0] + 0.51, strokes[0][1]);
     } else {
       ctx.moveTo(strokes[0][0], strokes[0][1]);
-      ctx.lineTo((strokes[0][0] + strokes[1][0]) * 0.5, 
+      ctx.lineTo((strokes[0][0] + strokes[1][0]) * 0.5,
                  (strokes[0][1] + strokes[1][1]) * 0.5);
       var i = 0;
       while(++i < (strokes.length - 1)) {
@@ -421,7 +427,7 @@ var Graffiti = {
           continue;
         }
       ctx.lineTo(strokes[i][0], strokes[i][1]);
-      ctx.lineTo((strokes[i][0] + strokes[i + 1][0]) * 0.5, 
+      ctx.lineTo((strokes[i][0] + strokes[i + 1][0]) * 0.5,
                  (strokes[i][1] + strokes[i + 1][1]) * 0.5);
       }
       ctx.lineTo(strokes[strokes.length - 1][0], strokes[strokes.length - 1][1]);
@@ -501,7 +507,7 @@ var Graffiti = {
   },
 
   historyStepBack: function() {
-    if(Graffiti.historyStepBackLock) { 
+    if(Graffiti.historyStepBackLock) {
       return false;
     }
     var data = Graffiti.drawAreaGetData();
@@ -565,7 +571,10 @@ var Graffiti = {
       Graffiti.drawAreaWrap.style.height = newHeight + "px";
       Graffiti.drawAreaWrap.style.width = newWidth + "px";
       // remove in production
-      ge("popup_wrap").style.width = (newWidth + 22) + "px";
+     // ge("popup_wrap").style.width = (newWidth + 22) + "px";
+      if (Graffiti.onResize) {
+        Graffiti.onResize(newWidth, newHeight);
+      }
       // /remove in production
       Graffiti.drawAreaMainCanvas.style.width = newWidth + "px";
       Graffiti.drawAreaMainCanvas.style.height = newHeight + "px";
@@ -649,13 +658,13 @@ var Graffiti = {
         var abs2 = Math.abs(strokes[i - 1][0] - strokes[i + 1][0])
                  + Math.abs(strokes[i - 1][1] -  strokes[i + 1][1]);
     if(abs1 > 10 && abs2 > abs1 * 0.8) {
-      chunk += "Q" + strokes[i][0] + "," + strokes[i][1] + " " 
-                   + ((strokes[i][0] + strokes[i + 1][0]) * 0.5) + "," 
+      chunk += "Q" + strokes[i][0] + "," + strokes[i][1] + " "
+                   + ((strokes[i][0] + strokes[i + 1][0]) * 0.5) + ","
                    + ((strokes[i][1] + strokes[i + 1][1]) * 0.5) + " ";
       continue;
     }
     chunk += "L" + strokes[i][0] + "," + strokes[i][1] + " ";
-    chunk += "L" + ((strokes[i][0] + strokes[i + 1][0]) * 0.5) + "," 
+    chunk += "L" + ((strokes[i][0] + strokes[i + 1][0]) * 0.5) + ","
                  + ((strokes[i][1] + strokes[i + 1][1]) * 0.5) + " ";
     }
     chunk += "L" + strokes[strokes.length - 1][0] + "," + strokes[strokes.length - 1][1] + " ";
@@ -672,8 +681,6 @@ var Graffiti = {
 
   // shortcuts
 
-  shortCutEastern: 0,
-
   shortCutHandle: function(event) {
     if(event.shiftKey) {
       console.log(event);
@@ -688,6 +695,8 @@ var Graffiti = {
         break;
       }
     }
-  },
+  }
 
 };
+
+//try{stManager.done('graffiti_new.js');}catch(e){}
