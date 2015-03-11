@@ -683,7 +683,6 @@ var Graffiti = {
 
   shortCutHandle: function(event) {
     if(event.shiftKey) {
-      console.log(event);
       switch(event.keyCode) {
         // ctrl + z
         case 90:
@@ -699,4 +698,4 @@ var Graffiti = {
 
 };
 
-//try{stManager.done('graffiti_new.js');}catch(e){}
+try{stManager.done('graffiti_new.js');}catch(e){}
