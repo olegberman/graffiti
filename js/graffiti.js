@@ -190,7 +190,7 @@ var Graffiti = {
   },
 
   colorPickerHighlight: function(target) {
-    if(Graffiti.colorPickerOpened == 1) {
+    if(Graffiti.colorPickerOpened) {
       var cleanRGB = target.style.backgroundColor.replace(/(rgb\(|\))/g, "")
       Graffiti.colorPickerLastHighlight = cleanRGB;
       var position = getXY(target);
@@ -321,7 +321,7 @@ var Graffiti = {
   },
 
   drawAreaAdvanceStroke: function(event) {
-    if(Graffiti.drawAreaInUse == 1) {
+    if(Graffiti.drawAreaInUse) {
       var data = Graffiti.drawAreaGetData();
       Graffiti.drawAreaStrokeContext.clearRect(0, 0, data[2], data[3]);
       var pos = Graffiti.drawAreaWrapOffset;
@@ -331,7 +331,7 @@ var Graffiti = {
   },
 
   drawAreaFinishStroke: function() {
-    if(Graffiti.drawAreaInUse == 1) {
+    if(Graffiti.drawAreaInUse) {
       var data = Graffiti.drawAreaGetData();
       Graffiti.drawAreaInUse = 0;
       Graffiti.draw(Graffiti.drawAreaMainContext);
@@ -493,7 +493,7 @@ var Graffiti = {
   },
 
   historyStepBack: function() {
-    if(Graffiti.historyStepBackLock == 1) { 
+    if(Graffiti.historyStepBackLock) { 
       return false;
     }
     var data = Graffiti.drawAreaGetData();
@@ -545,7 +545,7 @@ var Graffiti = {
   resizing: 0,
 
   resize: function(event) {
-    if(Graffiti.resizing == 1) {
+    if(Graffiti.resizing) {
       var canvasHeight = parseInt(Graffiti.drawAreaWrap.style.height);
       var resizerY = getXY(ge(Graffiti.resizer))[1];
       var newHeight = canvasHeight + event.pageY - resizerY;
