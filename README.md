@@ -12,4 +12,7 @@ Some people go crazy and make art out of simple drawing tool!
 <i><small>(credits for the piece go to Tatyana Lastovenko)</small></i>
 
 I can't draw as good as you can see, I just can code :)
-Pls feel free to contribute! Much love
+
+Pls feel free to contribute! 
+
+Much love
