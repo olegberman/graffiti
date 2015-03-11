@@ -9,6 +9,7 @@ Some people go crazy and make art out of simple drawing tool!
 
 <img src="http://cs305612.vk.me/v305612225/369f/11WhVDW4ig0.jpg" width="400" />
 
-(drawing credits go to Tatyana Lastovenko, I can't draw as good as you can see, I can code though :)
+<i><small>(credits for the piece go to Tatyana Lastovenko)</small></i>
 
-Pls feel free to contribute! 
+I can't draw as good as you can see, I just can code :)
+Pls feel free to contribute! Much love
